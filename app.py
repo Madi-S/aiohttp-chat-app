@@ -1,5 +1,9 @@
 import aioredis
 import asyncio
+
+import aiohtt_jinja2
+import jinja2
+
 from aiohttp import web
 from aiohttp_session import setup, get_session
 from aiohttp_session.redis_storage import RedisStorage
@@ -54,6 +58,8 @@ async def close_redis(app):
 @log
 def main():
     app = web.Application()
+
+    aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('templates'))
 
     app.on_cleanup.append(start_db)
     app.on_cleanup.append(close_db)
