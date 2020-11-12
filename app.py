@@ -1,6 +1,6 @@
 import aioredis
 import asyncio
-from aiohttp import app
+from aiohttp import web
 from aiohttp_session import setup, get_session
 from aiohttp_session.redis_storage import RedisStorage
 
@@ -9,7 +9,8 @@ from db import start_db, close_db
 
 import logging
 
-formatter = logging.Formatter(style='{', fmt='{name} - {levelName} - {asctime} - {pathname} - {lineNo} - {message}')
+formatter = logging.Formatter(
+    style='{', fmt='{name} - {levelName} - {asctime} - {pathname} - {lineNo} - {message}')
 
 handler = logging.StreamHandler()
 handler.setLevel(logging.DEBUG)
@@ -24,7 +25,8 @@ def log(f):
     def inner(*args, **kwargs):
         method = f.__name__
         try:
-            logger.debug('Method %s was called received: %s and %s', method, *args, **kwargs)
+            logger.debug('Method %s was called received: %s and %s',
+                         method, *args, **kwargs)
             return f(*args, **kwargs)
         except Exception:
             logger.exception('Error in method %s:', method, exc_info=True)
@@ -32,10 +34,12 @@ def log(f):
 
     return inner
 
+
 @log
 async def get_redis():
     logger.debug('Creating redis pool')
     return await aioredis.create_redis_pool()
+
 
 @log
 async def close_redis():
@@ -44,25 +48,23 @@ async def close_redis():
     await redis.wait_closed()
 
 
-
-
 @log
 def main():
     app = web.Application()
 
-    app.on_cleanup(start_db)
-    app.on_cleanup(close_db)
-
+    app.on_cleanup.append(start_db)
+    app.on_cleanup.append(close_db)
 
     try:
         loop = asyncio.get_event_loop()
         redis = get_redis()
-        redis_loop  =asyncio.run_until_complete(redis)
+        redis_loop = loop.run_until_complete(redis)
         storage = RedisStorage(redis_loop)
         app.on_cleanup.append(close_redis)
 
     except ConnectionRefusedError:
-        logger.warning('Cannot connect to redis server, switching to standard "EncryptedCookieStorage"')
+        logger.warning(
+            'Cannot connect to redis server, switching to standard "EncryptedCookieStorage"')
         import base64
         from cryptography import fernet
         from aiohttp_session.cookie_storage import EncryptedCookieStorage
@@ -71,13 +73,8 @@ def main():
         secret_key = base64.urlsafe_b64decode(fernet_key)
         storage = EncryptedCookieStorage(secret_key)
 
-
     setup_routes(app)
     setup(app, storage)
-
-
-
-
 
 
 if __name__ == '__main__':
