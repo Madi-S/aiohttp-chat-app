@@ -36,14 +36,17 @@ def log(f):
 
 
 @log
-async def get_redis():
+async def get_redis(app):
     logger.debug('Creating redis pool')
-    return await aioredis.create_redis_pool()
+    redis = await aioredis.create_redis_pool('redis://localhost', db=9, timeout=10)
+    app['redis'] = redis
+    return redis
 
 
 @log
-async def close_redis():
+async def close_redis(app):
     logger.info('Shutting down redis server')
+    redis = app['redis']
     redis.close()
     await redis.wait_closed()
 
