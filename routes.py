@@ -2,11 +2,15 @@ from handlers.chat import *
 from handlers.login import *
 
 
-routes = [('GET', '/login', signIn),
-          ('POST', '/login', login),
-          ('GET', '/chat', chat),
-          ('POST', '/chat', send_chat),
-          ('*', '/{tail:.*}', handle_get)]
+routes = [('GET', '/login', get_login),
+          ('POST', '/login', post_login),
+          ('GET', '/logout', get_logout),
+          ('POST', '/logout', post_logout),
+          ('GET', '/register', get_register),
+          ('POST', '/register', post_register),
+          ('GET', '/chat', get_chat),
+          ('POST', '/chat', post_chat),
+          ('*', '/{tail:.*}', handle_all)]
 
 
 def setup_routes(app):

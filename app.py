@@ -1,7 +1,7 @@
 import aioredis
 import asyncio
 
-import aiohtt_jinja2
+import aiohttp_jinja2
 import jinja2
 
 from aiohttp import web
