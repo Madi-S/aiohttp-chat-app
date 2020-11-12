@@ -60,7 +60,7 @@ def main():
 
     try:
         loop = asyncio.get_event_loop()
-        redis = get_redis()
+        redis = get_redis(app)
         redis_loop = loop.run_until_complete(redis)
         storage = RedisStorage(redis_loop)
         app.on_cleanup.append(close_redis)
