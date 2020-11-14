@@ -44,10 +44,12 @@ async def post_logout(request):
 
 async def post_recover(request):
     # recover user password by its user recovery link in the database `pwd_reset_token`
+    pass
 
 
 async def post_register(request):
     # if user registered correctly, redirect him/her to chat
+    pass
 
 
 async def get_logout(request):

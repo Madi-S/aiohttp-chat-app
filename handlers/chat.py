@@ -8,7 +8,7 @@ async def get_chat(request):
     pass
 
 
-async def post_chat(request):
+async def post_send(request):
     pass
 
 
