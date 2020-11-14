@@ -4,6 +4,8 @@ import asyncio
 import aiohttp_jinja2
 import jinja2
 
+import aioreloader
+
 from aiohttp import web
 from aiohttp_session import setup, get_session
 from aiohttp_session.redis_storage import RedisStorage
@@ -14,7 +16,7 @@ from db import start_db, close_db
 import logging
 
 formatter = logging.Formatter(
-    style='{', fmt='{name} - {levelName} - {asctime} - {pathname} - {lineNo} - {message}')
+    style='{', fmt='{name} - {levelname} - {asctime} - {pathname} - {lineno} - {message}')
 
 handler = logging.StreamHandler()
 handler.setLevel(logging.DEBUG)
@@ -30,7 +32,7 @@ def log(f):
         method = f.__name__
         try:
             logger.debug('Method %s was called received: %s and %s',
-                         method, *args, **kwargs)
+                         method, args, kwargs)
             return f(*args, **kwargs)
         except Exception:
             logger.exception('Error in method %s:', method, exc_info=True)
@@ -40,7 +42,7 @@ def log(f):
 
 
 @log
-async def get_redis(app):
+async def make_redis_pool(app):
     logger.debug('Creating redis pool')
     redis = await aioredis.create_redis_pool('redis://localhost', db=9, timeout=10)
     app['redis'] = redis
@@ -66,8 +68,9 @@ def main():
 
     try:
         loop = asyncio.get_event_loop()
-        redis = get_redis(app)
+        redis = make_redis_pool(app)
         redis_loop = loop.run_until_complete(redis)
+
         storage = RedisStorage(redis_loop)
         app.on_cleanup.append(close_redis)
 
@@ -83,7 +86,13 @@ def main():
         storage = EncryptedCookieStorage(secret_key)
 
     setup_routes(app)
+    logger.debug('Routes were setup')
     setup(app, storage)
+    logger.debug('Storage was setup')
+    aioreloader.start()
+    logger.debug('Start with code reload')
+
+    web.run_app(app)
 
 
 if __name__ == '__main__':

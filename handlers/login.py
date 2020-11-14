@@ -17,25 +17,30 @@ async def get_login(request):
 
 @template('login/register.html')
 async def get_register(request):
-    return {}
+    form = await request.post()
+    print(form)
+    # <MultiDictProxy('username': '123', 'psw': 'Username123', 'psw-repeat': 'Username123')>
 
 
 async def post_login(request):
-    router = request.app.router
     form = await request.post()
-    user_signature = (form['name'], form['password'])
+    print(form)
+
+    #router = request.app.router
+    # form = await request.post()
+    #user_signature = (form['name'], form['password'])
 
     # actually implement business logic to check credentials:
-    try:
-        user_id = DATABASE.index(user_signature)
-        # Always use `new_session` during login to guard against
-        # Session Fixation. See aiohttp-session#281
-        session = await new_session(request)
-        session['user_id'] = user_id
-        return web.HTTPFound(router['restricted'].url_for())
+    # try:
+    #    user_id = DATABASE.index(user_signature)
+    #    # Always use `new_session` during login to guard against
+    #    # Session Fixation. See aiohttp-session#281
+    #    session = await new_session(request)
+    #    session['user_id'] = user_id
+    #    return web.HTTPFound(router['restricted'].url_for())
 
-    except ValueError:
-        return web.Response(text='No such user', status=HTTPStatus.FORBIDDEN)
+    # except ValueError:
+    #    return web.Response(text='No such user', status=HTTPStatus.FORBIDDEN)
 
 
 async def post_logout(request):

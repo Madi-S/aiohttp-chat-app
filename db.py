@@ -16,11 +16,11 @@ async def start_db(app):
     conn = await db_pool.acquire()
     cur = await conn.cursor()
 
-    app['db'] = conn
+    app['pool'] = db_pool
     app['cur'] = cur
 
 
 async def close_db(app):
-    await app['db'].close()
-
-
+    pool = app['pool']
+    pool.close()
+    await pool.wait_closed()
