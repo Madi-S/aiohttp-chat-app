@@ -5,6 +5,25 @@ from aiohttp_session import new_session, get_session
 DATABASE = None
 
 
+def login_required(f):
+    async def wrapped(request, *args, **kwargs):
+        app = request.app
+        router = app.router
+
+        session = await get_session(request)
+
+        if 'user_id' not in session:
+            return web.HTTPFound(router['login'].url_for())
+
+        user_id = session['user_id']
+        # actually load user from your database (e.g. with aiopg)
+        # user = DATABASE[user_id]
+        app['user'] = user
+        return await f(request, *args, **kwargs)
+
+    return wrapped
+
+
 @template('login/login.html')
 async def get_login(request):
     # IF USER EXISTS -> redirect him/her to chat -> raise web.HTTPFound('/chat')
@@ -24,25 +43,50 @@ async def get_register(request):
 
 async def post_login(request):
     form = await request.post()
-    print(form)
-    # Form = ('username': '123', 'psw': 'fuckoff123A', 'psw-repeat': 'fuckoff123A', 'remember': 'on')
-    return {}
+    session = await new_session(request)
+    session['user_id'] = form['username'] + form['password']
 
-    #router = request.app.router
-    # form = await request.post()
-    #user_signature = (form['name'], form['password'])
+    if form.get('remember', None):
+        session['saved'] = True
+        print('User wants to save his cookies')
 
-    # actually implement business logic to check credentials:
-    # try:
-    #    user_id = DATABASE.index(user_signature)
-    #    # Always use `new_session` during login to guard against
-    #    # Session Fixation. See aiohttp-session#281
-    #    session = await new_session(request)
-    #    session['user_id'] = user_id
-    #    return web.HTTPFound(router['restricted'].url_for())
+    else:
+        session['saved'] = False
+        print('User does not want to be logged-in automatically')
 
-    # except ValueError:
-    #    return web.Response(text='No such user', status=HTTPStatus.FORBIDDEN)
+    raise web.HTTPFound('/chat')
+
+'''
+['ATTRS', 'POST_METHODS', '_MutableMapping__marker', '__abstractmethods__', '__bool__', '__class__', '__class_getitem__',
+ '__contains__', '__delattr__', '__delitem__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__',
+  '__getitem__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__module__',
+   '__ne__', '__new__', '__orig_bases__', '__parameters__', '__reduce__', '__reduce_ex__', '__repr__', '__reversed__', '__setattr__',
+    '__setitem__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '__weakref__', '_abc_impl', '_cache', '_client_max_size',
+     '_content_dict', '_content_type', '_headers', '_http_date', '_is_protocol', '_loop', '_match_info', '_message', '_method',
+      '_parse_content_type', '_payload', '_payload_writer', '_post', '_prepare_hook', '_protocol', '_read_bytes', '_rel_url', '_state',
+      '_stored_content_type', '_task', '_transport_peername', '_transport_sslcontext', '_version', 'app', 'body_exists', 'can_read_body',
+       'charset', 'clear', 'clone', 'config_dict', 'content', 'content_length', 'content_type', 'cookies', 'forwarded', 'get', 'has_body',
+       'headers', 'host', 'http_range', 'if_modified_since', 'if_range', 'if_unmodified_since', 'items', 'json', 'keep_alive', 'keys', 'loop',
+        'match_info', 'message', 'method', 'multipart', 'path', 'path_qs', 'pop', 'popitem', 'post', 'protocol', 'query', 'query_string',
+        'raw_headers', 'raw_path', 'read', 'rel_url', 'release', 'remote', 'scheme', 'secure', 'setdefault', 'task', 'text', 'transport',
+     'update', 'url', 'values', 'version', 'writer']
+'''
+
+#router = request.app.router
+# form = await request.post()
+#user_signature = (form['name'], form['password'])
+
+# actually implement business logic to check credentials:
+# try:
+#    user_id = DATABASE.index(user_signature)
+#    # Always use `new_session` during login to guard against
+#    # Session Fixation. See aiohttp-session#281
+#    session = await new_session(request)
+#    session['user_id'] = user_id
+#    return web.HTTPFound(router['restricted'].url_for())
+
+# except ValueError:
+#    return web.Response(text='No such user', status=HTTPStatus.FORBIDDEN)
 
 
 async def post_logout(request):

@@ -62,6 +62,7 @@ def main():
     app = web.Application()
 
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('templates'))
+    app['static_root_url'] = '/static'
 
     app.on_startup.append(start_db)
     app.on_cleanup.append(close_db)
