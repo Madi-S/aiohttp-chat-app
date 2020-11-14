@@ -10,7 +10,10 @@ body {
 /* Add padding to containers */
 .container {
   padding: 16px;
+  margin-left: 5%;
+  margin-right: 5%;
   background-color: white;
+  font-size: 18px;
 }
 
 /* Full-width input fields */
@@ -22,6 +25,7 @@ input[type="password"] {
   display: inline-block;
   border: none;
   background: #f1f1f1;
+  font-size: 18px;
 }
 
 input[type="text"]:focus,
@@ -37,7 +41,7 @@ hr {
 }
 
 /* Set a style for the submit button */
-.registerbtn {
+.submit_button {
   background-color: #4caf50;
   color: white;
   padding: 16px 20px;
@@ -45,22 +49,23 @@ hr {
   border: none;
   cursor: pointer;
   width: 100%;
+  font-size: 18px;
   opacity: 0.9;
 }
 
-.registerbtn:hover {
+.submit_button:hover {
   opacity: 1;
 }
 
 /* Add a blue text color to links */
 a {
   color: dodgerblue;
+  font-size: 15px;
 }
 
 /* Set a grey background color and center the text of the "sign in" section */
 .signin {
   background-color: #f1f1f1;
   text-align: center;
+  font-size: 18px;
 }
-
-

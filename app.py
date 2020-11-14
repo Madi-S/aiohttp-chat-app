@@ -63,6 +63,7 @@ def main():
 
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('templates'))
     app['static_root_url'] = '/static'
+    app.router.add_static('/static', 'static', name='static')
 
     app.on_startup.append(start_db)
     app.on_cleanup.append(close_db)
@@ -93,7 +94,7 @@ def main():
     aioreloader.start()
     logger.debug('Start with code reload')
 
-    web.run_app(app)
+    web.run_app(app, port=8000)
 
 
 if __name__ == '__main__':

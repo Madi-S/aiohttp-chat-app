@@ -1,29 +1,30 @@
 from aiohttp_jinja2 import template
 from aiohttp import web
 from aiohttp_session import new_session, get_session
+from http import HTTPStatus
 
-from .db import user_added
+from db import user_checked
 
 DATABASE = None
 
 
-def login_required(f):
-    async def wrapped(request, *args, **kwargs):
-        app = request.app
-        router = app.router
-
-        session = await get_session(request)
-
-        if 'user_id' not in session:
-            return web.HTTPFound(router['login'].url_for())
-
-        user_id = session['user_id']
-        # actually load user from your database (e.g. with aiopg)
-        # user = DATABASE[user_id]
-        app['user'] = user
-        return await f(request, *args, **kwargs)
-
-    return wrapped
+# def login_required(f):
+#    async def wrapped(request, *args, **kwargs):
+#        app = request.app
+#        router = app.router
+#
+#        session = await get_session(request)
+#
+#        if 'user_id' not in session:
+#            return web.HTTPFound(router['login'].url_for())
+#
+#        user_id = session['user_id']
+#        # actually load user from your database (e.g. with aiopg)
+#        # user = DATABASE[user_id]
+#        app['user'] = user
+#        return await f(request, *args, **kwargs)
+#
+#    return wrapped
 
 
 def check_cookies(f):
@@ -51,24 +52,44 @@ async def get_register(request):
 
 
 async def post_login(request):
+    # If user's inputs are satisfying DB -> redirect to chat
+    # If user's inputs are NOT satisfying DB -> return bad response
     form = await request.post()
-    session = await new_session(request)
+    session = await get_session(request)
 
-    app = request.app
-    pool = app['pool']
+    pool = request.app['pool']
     data = form
 
-    if user_added(pool, data):
-        raise web.HTTPFound('/chat')
-
-    session['user_id'] = form['username'] + form['password']
-
+    # If user wants to be logged-in automatically
     if form.get('remember', None):
         session['remember_me'] = True
-        print('User wants to save his cookies')
+        print('User WANTS to save his cookies')
 
-    session['remember_me'] = False
-    print('User does not want to be logged-in automatically')
+    else:
+        session['remember_me'] = False
+        print('User does NOT want to be logged-in automatically')
+
+    # Request came from registration page
+    if form.get('password-repeat'):
+
+        # Check if username's absence in db:
+        if await user_checked(pool, data):
+            print(f'User {form["username"]} has been added to database')
+            session['user_id'] = (form['username'], form['password'])
+            raise web.HTTPFound('/chat')
+
+        return web.Response(text=f'User {form["username"]} already exists', status=HTTPStatus.FORBIDDEN)
+
+    # Request came from login page
+    else:
+
+        # Check user's presence in db
+        if await user_checked(pool, data, register=False):
+            print(f'User {form["username"]} has been passed login section')
+            session['user_id'] = (form['username'], form['password'])
+            raise web.HTTPFound('/chat')
+
+        return web.Response(text=f'Username/Password pair does not match, or username {form["username"]} does not exist', status=HTTPStatus.FORBIDDEN)
 
 
 '''

@@ -1,6 +1,6 @@
-CREATE DATABASE webchat IF NOT EXISTS;
+CREATE DATABASE IF NOT EXISTS webchat;
 USE webchat;
-CREATE table chat_users IF NOT EXISTS(
+CREATE table IF NOT EXISTS chat_users(
     id serial,
     username VARCHAR(21) NOT NULL,
     pwd VARCHAR(31) NOT NULL,
