@@ -61,7 +61,7 @@ def main():
 
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('templates'))
 
-    app.on_cleanup.append(start_db)
+    app.on_startup.append(start_db)
     app.on_cleanup.append(close_db)
 
     try:
