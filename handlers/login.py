@@ -17,11 +17,7 @@ async def get_login(request):
 
 @template('login/register.html')
 async def get_register(request):
-    pass
-
-
-async def get_logout(request):
-    pass
+    return {}
 
 
 async def post_login(request):
@@ -46,5 +42,13 @@ async def post_logout(request):
     pass
 
 
+async def post_recover(request):
+    # recover user password by its user recovery link in the database `pwd_reset_token`
+
+
 async def post_register(request):
+    # if user registered correctly, redirect him/her to chat
+
+
+async def get_logout(request):
     pass

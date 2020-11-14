@@ -10,6 +10,8 @@ routes = [('GET', '/login', get_login),
           ('POST', '/register', post_register),
           ('GET', '/chat', get_chat),
           ('POST', '/chat', post_chat),
+          ('POST', '/send', post_send),
+          ('POST', '/recover', post_recover)
           ('*', '/{tail:.*}', handle_all)]
 
 

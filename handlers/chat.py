@@ -4,6 +4,7 @@ from aiohttp import web
 
 @template('chat.html')
 async def get_chat(request):
+    # check if user inputed login & password do exist in the database
     pass
 
 
