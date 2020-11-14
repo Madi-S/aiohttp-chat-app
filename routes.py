@@ -17,3 +17,6 @@ routes = [('GET', '/login', get_login),
 def setup_routes(app):
     for route in routes:
         app.router.add_route(*route)
+    app.router.add_static('/static/',
+                          path='static',
+                          name='static')

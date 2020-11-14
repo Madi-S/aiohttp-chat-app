@@ -24,3 +24,4 @@ async def close_db(app):
     pool = app['pool']
     pool.close()
     await pool.wait_closed()
+    print('DB WAS CLOSED')

@@ -19,12 +19,14 @@ async def get_login(request):
 async def get_register(request):
     form = await request.post()
     print(form)
-    # <MultiDictProxy('username': '123', 'psw': 'Username123', 'psw-repeat': 'Username123')>
+    return {}
 
 
 async def post_login(request):
     form = await request.post()
     print(form)
+    # Form = ('username': '123', 'psw': 'fuckoff123A', 'psw-repeat': 'fuckoff123A', 'remember': 'on')
+    return {}
 
     #router = request.app.router
     # form = await request.post()
