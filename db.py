@@ -1,6 +1,11 @@
 import aiomysql
 import asyncio
 
+TABLE_NAME = 'chat_users'
+INSERT_COMMAND = 'INSERT INTO %s (username, pwd) VALUES (%s, %s)'
+CHECK_COMMAND = 'SELECT EXISTS (SELECT 1 FROM %s WHERE username = %s LIMIT 1)'
+DELETE_USER_COMMAND = 'DELETE FROM %s WHERE username = %s'
+
 
 async def start_db(app):
     loop = asyncio.get_event_loop()
@@ -13,15 +18,27 @@ async def start_db(app):
         loop=loop,
     )
 
-    conn = await db_pool.acquire()
-    cur = await conn.cursor()
-
     app['pool'] = db_pool
-    app['cur'] = cur
 
 
 async def close_db(app):
     pool = app['pool']
     pool.close()
     await pool.wait_closed()
-    print('DB WAS CLOSED')
+
+
+async def user_added(pool, data: tuple):
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+
+            await cur.execute(CHECK_COMMAND, data[0])
+            exists = await cur.fetchone()
+
+            if not exists:
+                await cur.execute(INSERT_COMMAND, data)
+                print(f'User {data} was addded to database')
+
+            else:
+                print(f'User {data} was NOT added to database')
+                return False
+

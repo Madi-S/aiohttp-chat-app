@@ -2,6 +2,8 @@ from aiohttp_jinja2 import template
 from aiohttp import web
 from aiohttp_session import new_session, get_session
 
+from .db import user_added
+
 DATABASE = None
 
 
@@ -37,6 +39,7 @@ def check_cookies(f):
 
     return inner
 
+
 @template('login/login.html')
 async def get_login(request):
     return {'content': 'Please enter login and password'}
@@ -50,17 +53,23 @@ async def get_register(request):
 async def post_login(request):
     form = await request.post()
     session = await new_session(request)
+
+    app = request.app
+    pool = app['pool']
+    data = form
+
+    if user_added(pool, data):
+        raise web.HTTPFound('/chat')
+
     session['user_id'] = form['username'] + form['password']
 
     if form.get('remember', None):
         session['remember_me'] = True
         print('User wants to save his cookies')
 
-    else:
-        session['remember_me'] = False
-        print('User does not want to be logged-in automatically')
+    session['remember_me'] = False
+    print('User does not want to be logged-in automatically')
 
-    raise web.HTTPFound('/chat')
 
 '''
 ['ATTRS', 'POST_METHODS', '_MutableMapping__marker', '__abstractmethods__', '__bool__', '__class__', '__class_getitem__',
@@ -68,13 +77,13 @@ async def post_login(request):
   '__getitem__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__module__',
    '__ne__', '__new__', '__orig_bases__', '__parameters__', '__reduce__', '__reduce_ex__', '__repr__', '__reversed__', '__setattr__',
     '__setitem__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '__weakref__', '_abc_impl', '_cache', '_client_max_size',
-     '_content_dict', '_content_type', '_headers', '_http_date', '_is_protocol', '_loop', '_match_info', '_message', '_method',
-      '_parse_content_type', '_payload', '_payload_writer', '_post', '_prepare_hook', '_protocol', '_read_bytes', '_rel_url', '_state',
-      '_stored_content_type', '_task', '_transport_peername', '_transport_sslcontext', '_version', 'app', 'body_exists', 'can_read_body',
-       'charset', 'clear', 'clone', 'config_dict', 'content', 'content_length', 'content_type', 'cookies', 'forwarded', 'get', 'has_body',
-       'headers', 'host', 'http_range', 'if_modified_since', 'if_range', 'if_unmodified_since', 'items', 'json', 'keep_alive', 'keys', 'loop',
-        'match_info', 'message', 'method', 'multipart', 'path', 'path_qs', 'pop', 'popitem', 'post', 'protocol', 'query', 'query_string',
-        'raw_headers', 'raw_path', 'read', 'rel_url', 'release', 'remote', 'scheme', 'secure', 'setdefault', 'task', 'text', 'transport',
+  '_content_dict', '_content_type', '_headers', '_http_date', '_is_protocol', '_loop', '_match_info', '_message', '_method',
+   '_parse_content_type', '_payload', '_payload_writer', '_post', '_prepare_hook', '_protocol', '_read_bytes', '_rel_url', '_state',
+   '_stored_content_type', '_task', '_transport_peername', '_transport_sslcontext', '_version', 'app', 'body_exists', 'can_read_body',
+    'charset', 'clear', 'clone', 'config_dict', 'content', 'content_length', 'content_type', 'cookies', 'forwarded', 'get', 'has_body',
+    'headers', 'host', 'http_range', 'if_modified_since', 'if_range', 'if_unmodified_since', 'items', 'json', 'keep_alive', 'keys', 'loop',
+     'match_info', 'message', 'method', 'multipart', 'path', 'path_qs', 'pop', 'popitem', 'post', 'protocol', 'query', 'query_string',
+     'raw_headers', 'raw_path', 'read', 'rel_url', 'release', 'remote', 'scheme', 'secure', 'setdefault', 'task', 'text', 'transport',
      'update', 'url', 'values', 'version', 'writer']
 '''
 
@@ -96,16 +105,12 @@ async def post_login(request):
 
 
 async def post_logout(request):
-    pass
+    session = await new_session(request)
+    session.flush()
 
 
 async def post_recover(request):
     # recover user password by its user recovery link in the database `pwd_reset_token`
-    pass
-
-
-async def post_register(request):
-    # if user registered correctly, redirect him/her to chat
     pass
 
 

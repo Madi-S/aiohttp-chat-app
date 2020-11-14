@@ -3,34 +3,21 @@ from aiohttp import web
 from aiohttp_session import new_session, get_session
 
 
-def check_cookies(f):
-    async def inner(request, *args, **kwargs):
-        session = await new_session(request)
 
-        if session.get('user_id') and session.get('remember_me'):
-            print('Allowing user not to login')
-            raise web.HTTPFound('/chat')
-
-        return await f(request, *args, **kwargs)
-
-    return inner
-
-
-@check_cookies
 @template('chat/chat.html')
 async def get_chat(request):
     session = await new_session(request)
 
-    if session.get('user_id') and session.get('remember_me'):
-        print('Allowing user not to login')
-        raise web.HTTPFound('/chat')
-
-    else:
+    if not (session.get('user_id') and session.get('remember_me')):
+        print('Not allowing user to enter chat. Redirecting user to login page')
         raise web.HTTPFound('/register')
+
+    print('Allowing user to enter chat')
+    return {}
 
 
 async def post_send(request):
-    pass
+    return {'Content':'Your message has been sent'}
 
 
 async def handle_all(request):

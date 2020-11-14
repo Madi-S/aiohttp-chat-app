@@ -1,8 +1,15 @@
-create table users(
-    id serial, 
-    username varchar(20) not null,
-    pwd varchar(25) not null,
-    pwd_reset_token varchar(100) not null,
-    pwd_reset_expiration datetime
-)
-
+CREATE DATABASE webchat IF NOT EXISTS;
+USE webchat;
+CREATE table chat_users IF NOT EXISTS(
+    id serial,
+    username VARCHAR(21) NOT NULL,
+    pwd VARCHAR(31) NOT NULL,
+    pwd_reset_token VARCHAR(100),
+    pwd_reset_expiration DATETIME
+);
+INSERT INTO chat_users(username, pwd)
+VALUES ('KumysPower', 'KumysSila123'),
+    ('Jeremy34', '040204Johnson'),
+    ('Danielzzz', 'easyPASSSWORD555'),
+    ('AttilaJohnson', 'aJ5435345345'),
+    ('FuckingCow', 'FuckingCow123');
