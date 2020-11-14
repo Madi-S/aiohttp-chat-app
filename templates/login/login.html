@@ -87,17 +87,19 @@
     <form id="post" method="post" action="login">   
         <div class="container">
             <h1>Login</h1>
-            <p>Please fill in this form to create an account.</p>
+            <p>Please fill in this form to login.</p>
             <hr>
             <label for="username"><b>Username</b></label>    
             <input type="text" name="username" id="username" placeholder="Enter Username" pattern="^[A-Za-z0-9]{3,31}$" title="Must contain 3-20 characters" required>    
             <label for="password"><b>Password</b></label>    
             <input type="password" name="password" id="password" placeholder="Enter Password" pattern="^((?!.*[\s])(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,30})" title="Must contain at least one number and one uppercase and lowercase letter, and 8-30 characters. Whitespaces are disallowed" required>     
             <hr>
-            <button type="submit" class="submit_button">Log In</button>   
+            <button type="submit" class="submit_button">Login</button>   
             <div class="container signin">
               <input type="checkbox" id="check" name="remember">
-                <span>Remember me </span><p></p> <a href="/recover">Forgot password</a>    
+                <span>Remember me </span><p></p>
+                <p>Do not have an account? <a href="/login" style="font-size: 18px;">Register</a></p>
+                <a href="/recover"  style="font-size: 18px;">Forgot password</a>    
             </div> 
         </div>
     </form>     

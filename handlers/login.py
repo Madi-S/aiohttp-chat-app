@@ -24,20 +24,26 @@ def login_required(f):
     return wrapped
 
 
+def check_cookies(f):
+    async def inner(request, *args, **kwargs):
+        session = await new_session(request)
+
+        if session.get('user_id') and session.get('remember_me'):
+            print(
+                'Redirecting user straight to the chat because of saved cookies and remember me checkbox')
+            raise web.HTTPFound('/chat')
+
+        return await f(request, *args, **kwargs)
+
+    return inner
+
 @template('login/login.html')
 async def get_login(request):
-    # IF USER EXISTS -> redirect him/her to chat -> raise web.HTTPFound('/chat')
-    session = await new_session(request)
-    if session.get('user'):
-        raise web.HTTPFound('/chat')
-
     return {'content': 'Please enter login and password'}
 
 
 @template('login/register.html')
 async def get_register(request):
-    form = await request.post()
-    print(form)
     return {}
 
 
@@ -47,11 +53,11 @@ async def post_login(request):
     session['user_id'] = form['username'] + form['password']
 
     if form.get('remember', None):
-        session['saved'] = True
+        session['remember_me'] = True
         print('User wants to save his cookies')
 
     else:
-        session['saved'] = False
+        session['remember_me'] = False
         print('User does not want to be logged-in automatically')
 
     raise web.HTTPFound('/chat')
