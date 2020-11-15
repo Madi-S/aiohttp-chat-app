@@ -1,18 +1,38 @@
 <html>
 <head>
-<link href="style.css" type="text/css" rel="stylesheet"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="chat_style.css" type="text/css" rel="stylesheet"/>
 </head>
 <body>
-<div id="wrapper">
+    
 
-<div id="sms_div">
- <form method="post" action="send_message.php">
-  <input type="text" name="recievers_no" placeholder="Enter Reciever's No">
-  <br>
-  <textarea name="message" placeholder="Enter Message Text"></textarea>
-  <br>
-  <input type="submit" name="send_message" value="SEND MESSAGE">
- </form>
+    <form align="right" name="form1" method="post" action="logout">
+        <input class="signout" name="submit2" type="submit" id="submit2" value="Sign out">
+    </form>
+
+<br><br><br>
+
+    <link href="{{ static('css/chat_style.css') }}" rel="stylesheet">
+
+
+<div class="container">
+   {%  for mes in messages %}
+      
+    <p>Time sent: {{ mes['time'] }}</p>
+    <p>From: {{  mes['user'] }}</p>
+    <p>Message:: {{  mes['msg'] }}</p>
+
+    {% endfor %}
+
+</div>
+<br><br><br><br><br><br><br><br><br><br><br>
+
+<div class="container">
+    <p>
+        <input type="message" placeholder="Type your messsage here" id="message" autocomplete="off">
+        <input class="button" type="submit" id='submit' value="Send">
+       
+    </p>
 </div>
 
 </div>

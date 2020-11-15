@@ -78,7 +78,7 @@ async def post_login(request):
             session['user_id'] = (form['username'], form['password'])
             raise web.HTTPFound('/chat')
 
-        return web.Response(text=f'User {form["username"]} already exists', status=HTTPStatus.FORBIDDEN)
+        return web.HTTPFound('/register', text=f'User {form["username"]} already exists',)
 
     # Request came from login page
     else:
@@ -89,7 +89,7 @@ async def post_login(request):
             session['user_id'] = (form['username'], form['password'])
             raise web.HTTPFound('/chat')
 
-        return web.Response(text=f'Username/Password pair does not match, or username {form["username"]} does not exist', status=HTTPStatus.FORBIDDEN)
+        return web.HTTPFound('/login', text=f'Username/Password pair does not match, or username {form["username"]} does not exist')
 
 
 '''
@@ -108,26 +108,14 @@ async def post_login(request):
      'update', 'url', 'values', 'version', 'writer']
 '''
 
-#router = request.app.router
-# form = await request.post()
-#user_signature = (form['name'], form['password'])
-
-# actually implement business logic to check credentials:
-# try:
-#    user_id = DATABASE.index(user_signature)
-#    # Always use `new_session` during login to guard against
-#    # Session Fixation. See aiohttp-session#281
-#    session = await new_session(request)
-#    session['user_id'] = user_id
-#    return web.HTTPFound(router['restricted'].url_for())
-
-# except ValueError:
-#    return web.Response(text='No such user', status=HTTPStatus.FORBIDDEN)
-
 
 async def post_logout(request):
-    session = await new_session(request)
-    session.flush()
+    session = await get_session(request)
+    print(f'User {session["user_id"]} has been deleted from session storage')
+    del session['user_id']
+    del session['remember_me']
+
+    raise web.HTTPFound('/login', text='Successful logout')
 
 
 async def post_recover(request):
@@ -136,4 +124,4 @@ async def post_recover(request):
 
 
 async def get_logout(request):
-    pass
+    raise web.HTTPFound('/login', text='Login first')
