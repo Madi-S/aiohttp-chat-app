@@ -16,7 +16,7 @@ from db import start_db, close_db
 import logging
 
 formatter = logging.Formatter(
-    style='{', fmt='{name} - {levelname} - {asctime} - {pathname} - {lineno} - {message}')
+    style='{', fmt='{levelname} - {name} - {asctime} - {pathname} - {lineno} - {message}')
 
 handler = logging.StreamHandler()
 handler.setLevel(logging.DEBUG)

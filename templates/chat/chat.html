@@ -16,23 +16,26 @@
 
 
 <div class="container">
-   {%  for msg in msgs %}
-      
-    <p>Time sent: {{ msg[3] }}</p>
-    <p>From: {{  msg[1] }}</p>
-    <p>Message: {{  msg[2] }}</p>
-    <small align="right">Message id: {{ msg[0] }}</small>
-
+    {%  for msg in msgs %}
+    <ul>
+        <li>From: {{  msg[1] }}</li>
+        <li>Message: {{  msg[2] }}</li>
+        <li>Time sent: {{ msg[3] }}</li>
+        <li>Message id: {{ msg[0] }}</li>
+    </ul>
     {% endfor %}
-
 </div>
+
 <br><br><br><br><br><br><br><br><br><br><br>
 
 <div class="container">
     <p>
-        <textarea type="message" name="post-message" cols="137" align="center" rows="15" tabindex="101" placeholder="Type your messsage here" id="message" autocomplete="off"></textarea>
-        <br>
-        <input class="button" type="submit" id='submit' value="Send">
+        <form id="post" method="post" action="send">   
+            <textarea type="message" name="post-message" cols="137" align="center" rows="15" tabindex="101" placeholder="Type your messsage here" id="message" autocomplete="off"></textarea>            
+            <br>
+            <input type="submit" class="button"  id='submit' value="Send">
+        </form>
+        
        
     </p>
 </div>
