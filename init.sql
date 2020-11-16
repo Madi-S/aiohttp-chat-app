@@ -1,6 +1,6 @@
 CREATE DATABASE IF NOT EXISTS webchat;
 USE webchat;
-CREATE table IF NOT EXISTS chat_users(
+CREATE TABLE IF NOT EXISTS chat_users(
     id serial,
     username VARCHAR(21) NOT NULL,
     pwd VARCHAR(31) NOT NULL,
@@ -13,3 +13,11 @@ VALUES ('KumysPower', 'KumysSila123'),
     ('Danielzzz', 'easyPASSSWORD555'),
     ('AttilaJohnson', 'aJ5435345345'),
     ('FuckingCow', 'FuckingCow123');
+CREATE TABLE IF NOT EXISTS chat_messages(
+    id serial,
+    username VARCHAR(21) NOT NULL,
+    msg VARCHAR(2000) NOT NULL,
+    time_sent DATETIME NOT NULL
+);
+INSERT INTO chat_messages (username, msg, time_sent)
+VALUES ('Admin', 'Hi Slaves', '9999-12-31 23:59:59');

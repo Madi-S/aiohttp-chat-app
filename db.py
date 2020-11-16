@@ -1,11 +1,14 @@
 import aiomysql
 import asyncio
 
-TABLE_NAME = 'chat_users'
+TABLE_USERS_NAME = 'chat_users'
 INSERT_COMMAND = 'INSERT INTO chat_users (username, pwd) VALUES (%s, %s);'
 CHECK_COMMAND = 'SELECT EXISTS (SELECT 1 FROM chat_users WHERE username = %s LIMIT 1);'
 SATISFY_COMMAND = 'SELECT EXISTS (SELECT 1 FROM chat_users WHERE username = %s and pwd = %s LIMIT 1);'
 DELETE_USER_COMMAND = 'DELETE FROM chat_users WHERE username = %s;'
+
+TABLE_MESSAGES_NAME = 'chat_messages'
+GET_10_LAST_MESSAGES = 'SELECT * FROM chat_messages ORDER BY id DESC LIMIT 10'
 
 
 async def start_db(app):
@@ -29,6 +32,13 @@ async def close_db(app):
     print('closing db')
 
 
+async def get_msgs(pool):
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(GET_10_LAST_MESSAGES)
+            msgs = await cur.fetchall()
+
+    return msgs
 
 
 async def user_checked(pool, data: tuple, register=True):
@@ -48,9 +58,9 @@ async def user_checked(pool, data: tuple, register=True):
                     print(f'User {data} was addded to database')
                     return True
 
-                print(f'User {data["username"]} exists - NOT ADDED TO DATABASE')
+                print(
+                    f'User {data["username"]} exists - NOT ADDED TO DATABASE')
                 return False
-                              
 
             # Check user in database
             else:
@@ -61,6 +71,6 @@ async def user_checked(pool, data: tuple, register=True):
                 if user_exists[0]:
                     print(f'User {data["username"]} exists in - SATISFIED DB')
                     return True
-                
+
                 print('Login/Password pair does not match or user does not exists')
                 return False

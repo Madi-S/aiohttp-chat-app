@@ -30,6 +30,11 @@ input[type="message"] {
   font-size: 18px;
 }
 
+.textbox {
+  margin-left: 5%;
+  margin-right: 5%;
+  font-size: 30px;
+}
 
 .signout {
   background-color: white;

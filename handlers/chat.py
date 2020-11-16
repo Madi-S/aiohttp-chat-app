@@ -2,6 +2,8 @@ from aiohttp_jinja2 import template
 from aiohttp import web
 from aiohttp_session import new_session, get_session
 
+from db import get_msgs
+
 
 @template('chat/chat.html')
 async def get_chat(request):
@@ -12,14 +14,21 @@ async def get_chat(request):
         raise web.HTTPFound('/register')
 
     print('Allowing user to enter chat')
-    mes = [{'time': 1, 'user': 'user123', 'msg': 'Hello World'}]
-    return {'messages': mes}
+
+    msgs = await get_msgs(request.app['pool'])
+    print(msgs)
+    return {'msgs': msgs}
 
 
 async def post_send(request):
     form = await request.post()
+    print(form, request, 'in post_send')
+
     return {'Content': 'Your message has been sent'}
 
 
 async def handle_all(request):
+    form = await request.post()
+    print(form, 'in handle_all')
+
     raise web.HTTPFound('/chat')

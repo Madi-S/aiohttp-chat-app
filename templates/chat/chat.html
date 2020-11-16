@@ -16,11 +16,12 @@
 
 
 <div class="container">
-   {%  for mes in messages %}
+   {%  for msg in msgs %}
       
-    <p>Time sent: {{ mes['time'] }}</p>
-    <p>From: {{  mes['user'] }}</p>
-    <p>Message:: {{  mes['msg'] }}</p>
+    <p>Time sent: {{ msg[3] }}</p>
+    <p>From: {{  msg[1] }}</p>
+    <p>Message: {{  msg[2] }}</p>
+    <small align="right">Message id: {{ msg[0] }}</small>
 
     {% endfor %}
 
@@ -29,7 +30,8 @@
 
 <div class="container">
     <p>
-        <input type="message" placeholder="Type your messsage here" id="message" autocomplete="off">
+        <textarea type="message" name="post-message" cols="137" align="center" rows="15" tabindex="101" placeholder="Type your messsage here" id="message" autocomplete="off"></textarea>
+        <br>
         <input class="button" type="submit" id='submit' value="Send">
        
     </p>
