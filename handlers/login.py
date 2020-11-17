@@ -48,7 +48,7 @@ async def get_login(request):
 
 @template('login/register.html')
 async def get_register(request):
-    return {}
+    return {'content': 'Please create login and password for your account'}
 
 
 async def post_login(request):
