@@ -1,19 +1,18 @@
 <html>
 <head>
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="chat_style.css" type="text/css" rel="stylesheet"/>
+    <link href="chat_style.css" type="text/css" rel="stylesheet"/>
+    <link href="{{ static('css/chat_style.css') }}" rel="stylesheet">
+
 </head>
 <body>
-    
 
-    <form align="right" name="form1" method="post" action="logout">
-        <input class="signout" name="submit2" type="submit" id="submit2" value="Sign out">
+    <form align="right" method="post" action="logout">
+        <input class="signout-button"  type="submit" value="Sign out">
     </form>
 
 <br><br><br>
-
-    <link href="{{ static('css/chat_style.css') }}" rel="stylesheet">
-
 
 <div class="container">
     {%  for msg in msgs %}
@@ -26,14 +25,14 @@
     {% endfor %}
 </div>
 
-<br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br>
 
 <div class="container">
     <p>
         <form id="post" method="post" action="send">   
-            <textarea type="message" name="post-message" cols="137" align="center" rows="15" tabindex="101" placeholder="Type your messsage here" id="message" autocomplete="off"></textarea>            
+            <textarea type="message" name="message" maxlength="2000" cols="207" align="center" rows="15" tabindex="101" placeholder="Type your messsage here ..." autocomplete="off"></textarea>            
             <br>
-            <input type="submit" class="button"  id='submit' value="Send">
+            <input type="submit" class="button" id='submit' value="Send">
         </form>
         
        

@@ -26,11 +26,13 @@ async def post_send(request):
     form = await request.post()
     session = await get_session(request)
 
-    msg = form.get('post-message', 'None')
-    from_user = session.get('user_id')[0]
-    time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    msg = form.get('message', 'None')
+    if len(msg) <= 2000:
+        from_user = session.get('user_id')[0]
+        time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    await add_msg(request.app['pool'], (from_user, msg, time))
+        await add_msg(request.app['pool'], (from_user, msg, time))
+    
 
     raise web.HTTPFound('/chat')
 

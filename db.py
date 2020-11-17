@@ -10,7 +10,7 @@ DELETE_USER_COMMAND = 'DELETE FROM chat_users WHERE username = %s;'
 
 TABLE_MESSAGES_NAME = 'chat_messages'
 INSERT_MSG_COMMAND = 'INSERT INTO chat_messages (username, msg, time_sent) VALUES (%s, %s, %s)'
-GET_10_LAST_MSGS_COMMAND = 'SELECT * FROM chat_messages ORDER BY id DESC LIMIT 10'
+GET_10_LAST_MSGS_COMMAND = 'SELECT * FROM (SELECT * FROM chat_messages ORDER BY id DESC LIMIT 10)Var1 ORDER BY id ASC'
 
 
 async def start_db(app):
@@ -48,7 +48,7 @@ async def add_msg(pool, data):
         async with conn.cursor() as cur:
             await cur.execute(INSERT_MSG_COMMAND, data)
             await conn.commit()
-            
+
             return True
 
 
