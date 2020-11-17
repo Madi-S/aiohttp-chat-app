@@ -1,21 +1,17 @@
-import asyncio
-
 import aiohttp_jinja2
 import jinja2
 
 import aioreloader
 
-import aiohttp_csrf
-
 from aiohttp import web
-from aiohttp_session import setup, get_session
-from aiohttp_session.redis_storage import RedisStorage
+from aiohttp_session import setup as setup_session, get_session
 
 from routes import setup_routes
 from db import start_db, close_db
 
 from py_settings import log, logger
-from redis_storage import create_redis, close_redis
+from redis_storage import setup_redis_storage, close_redis
+from web_csrf import setup_csrf
 
 
 @log
@@ -30,11 +26,7 @@ def main():
     app.on_cleanup.append(close_db)
 
     try:
-        loop = asyncio.get_event_loop()
-        redis = create_redis(app)
-        redis_loop = loop.run_until_complete(redis)
-
-        storage = RedisStorage(redis_loop)
+        storage = setup_redis_storage(app)
         app.on_cleanup.append(close_redis)
 
     except ConnectionRefusedError:
@@ -51,26 +43,16 @@ def main():
     setup_routes(app)
     logger.debug('Routes were setup')
 
-    setup(app, storage)
+    setup_session(app, storage)
     logger.debug('Storage was setup')
+
+    setup_csrf(app, storage)
+    logger.debug('csrf protection was setup')
 
     aioreloader.start()
     logger.debug('Start with code reload')
 
     web.run_app(app, port=8000)
-
-
-
-def setup_csrf(app):
-    FORM_FIELD_NAME = '_csrf_token'
-    COOKIE_NAME = 'csrf_token'
-
-    csrf_policy = aiohttp_csrf.policy.FormPolicy(FORM_FIELD_NAME)
-    csrf_storage = aiohttp_csrf.storage.CookieStorage(COOKIE_NAME)
-
-    aiohttp_csrf.setup(app, policy=csrf_policy, storage=csrf_storage)
-
-    pass
 
 
 if __name__ == '__main__':
