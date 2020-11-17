@@ -1,9 +1,13 @@
-from aiohttp_jinja2 import template
 from aiohttp import web
+
+from aiohttp_jinja2 import template
 from aiohttp_session import new_session, get_session
-from http import HTTPStatus
+from aiohttp_csrf import csrf_protect
 
 from db import user_checked
+from py_settings import log, logger
+from web_csrf import generate_csrf_token, FORM_FIELD_NAME
+
 
 DATABASE = None
 
@@ -26,7 +30,7 @@ DATABASE = None
 #
 #    return wrapped
 
-
+@log
 def check_cookies(f):
     async def inner(request, *args, **kwargs):
         session = await new_session(request)
@@ -41,16 +45,26 @@ def check_cookies(f):
     return inner
 
 
+@log
+@csrf_protect
 @template('login/login.html')
 async def get_login(request):
-    return {'content': 'Please enter login and password'}
+    token = await generate_csrf_token(request)
+
+    return {'content': 'Please enter login and password', 'field_name': FORM_FIELD_NAME, 'token': token}
 
 
+@log
+@csrf_protect
 @template('login/register.html')
 async def get_register(request):
-    return {'content': 'Please create login and password for your account'}
+    token = await generate_csrf_token(request)
+
+    return {'content': 'Please create login and password for your account', 'field_name': FORM_FIELD_NAME, 'token': token}
 
 
+@log
+@csrf_protect
 async def post_login(request):
     # If user's inputs are satisfying DB -> redirect to chat
     # If user's inputs are NOT satisfying DB -> return bad response
@@ -92,23 +106,7 @@ async def post_login(request):
         return web.HTTPFound('/login', text=f'Username/Password pair does not match, or username {form["username"]} does not exist')
 
 
-'''
-['ATTRS', 'POST_METHODS', '_MutableMapping__marker', '__abstractmethods__', '__bool__', '__class__', '__class_getitem__',
- '__contains__', '__delattr__', '__delitem__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__',
-  '__getitem__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__module__',
-   '__ne__', '__new__', '__orig_bases__', '__parameters__', '__reduce__', '__reduce_ex__', '__repr__', '__reversed__', '__setattr__',
-    '__setitem__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '__weakref__', '_abc_impl', '_cache', '_client_max_size',
-  '_content_dict', '_content_type', '_headers', '_http_date', '_is_protocol', '_loop', '_match_info', '_message', '_method',
-   '_parse_content_type', '_payload', '_payload_writer', '_post', '_prepare_hook', '_protocol', '_read_bytes', '_rel_url', '_state',
-   '_stored_content_type', '_task', '_transport_peername', '_transport_sslcontext', '_version', 'app', 'body_exists', 'can_read_body',
-    'charset', 'clear', 'clone', 'config_dict', 'content', 'content_length', 'content_type', 'cookies', 'forwarded', 'get', 'has_body',
-    'headers', 'host', 'http_range', 'if_modified_since', 'if_range', 'if_unmodified_since', 'items', 'json', 'keep_alive', 'keys', 'loop',
-     'match_info', 'message', 'method', 'multipart', 'path', 'path_qs', 'pop', 'popitem', 'post', 'protocol', 'query', 'query_string',
-     'raw_headers', 'raw_path', 'read', 'rel_url', 'release', 'remote', 'scheme', 'secure', 'setdefault', 'task', 'text', 'transport',
-     'update', 'url', 'values', 'version', 'writer']
-'''
-
-
+@log
 async def post_logout(request):
     session = await get_session(request)
     print(f'User {session["user_id"]} has been deleted from session storage')
@@ -118,10 +116,12 @@ async def post_logout(request):
     raise web.HTTPFound('/login', text='Successful logout')
 
 
+@log
+async def get_logout(request):
+    raise web.HTTPFound('/login', text='Login first')
+
+
+@log
 async def post_recover(request):
     # recover user password by its user recovery link in the database `pwd_reset_token`
     pass
-
-
-async def get_logout(request):
-    raise web.HTTPFound('/login', text='Login first')
