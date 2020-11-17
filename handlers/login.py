@@ -2,14 +2,12 @@ from aiohttp import web
 
 from aiohttp_jinja2 import template
 from aiohttp_session import new_session, get_session
-from aiohttp_csrf import csrf_protect
+from aiohttp_csrf import csrf_protect, generate_token
 
 from db import user_checked
 from py_settings import log, logger
-from web_csrf import generate_csrf_token, FORM_FIELD_NAME
 
-
-DATABASE = None
+from config import FORM_FIELD_NAME
 
 
 # def login_required(f):
@@ -46,25 +44,25 @@ def check_cookies(f):
 
 
 @log
-@csrf_protect
+# @csrf_protect
 @template('login/login.html')
 async def get_login(request):
-    token = await generate_csrf_token(request)
+    token = await generate_token(request)
 
-    return {'content': 'Please enter login and password', 'field_name': FORM_FIELD_NAME, 'token': token}
+    return {'field_name': FORM_FIELD_NAME, 'token': token}
 
 
 @log
-@csrf_protect
+# @csrf_protect
 @template('login/register.html')
 async def get_register(request):
-    token = await generate_csrf_token(request)
+    token = await generate_token(request)
 
-    return {'content': 'Please create login and password for your account', 'field_name': FORM_FIELD_NAME, 'token': token}
+    return {'field_name': FORM_FIELD_NAME, 'token': token}
 
 
 @log
-@csrf_protect
+# @csrf_protect
 async def post_login(request):
     # If user's inputs are satisfying DB -> redirect to chat
     # If user's inputs are NOT satisfying DB -> return bad response

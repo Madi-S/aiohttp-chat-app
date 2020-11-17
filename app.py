@@ -3,6 +3,8 @@ import jinja2
 
 import aioreloader
 
+import aiohttp_csrf
+
 from aiohttp import web
 from aiohttp_session import setup as setup_session, get_session
 
@@ -10,7 +12,7 @@ from routes import setup_routes
 from db import start_db, close_db
 
 from py_settings import log, logger
-from web_csrf import setup_csrf
+from config import FORM_FIELD_NAME, COOKIE_NAME, SECRET_PHRASE
 
 
 @log
@@ -55,16 +57,37 @@ def main():
         secret_key = base64.urlsafe_b64decode(fernet_key)
         storage = EncryptedCookieStorage(secret_key)
 
+    async def custom_async_error_handler(request):
+        return web.Response(text='You silly bot, fuck off!', status=403)
+
+    def setup_csrf_protection(app):
+        csrf_policy = aiohttp_csrf.policy.FormPolicy(FORM_FIELD_NAME)
+        csrf_storage = aiohttp_csrf.storage.CookieStorage(COOKIE_NAME)
+
+        # aiohttp_csrf.token_generator.HashedTokenGenerator(SECRET_PHRASE)
+
+        aiohttp_csrf.setup(app, policy=csrf_policy, storage=csrf_storage,
+                           error_renderer=custom_async_error_handler)
+
+        app.middlewares.append(aiohttp_csrf.csrf_middleware)
+
+        # Using middlewares, all handlers will be protected
+        # app.middlewares.append(aiohttp_csrf.csrf_middleware)
+
+        # For mannual protection
+        # @aiohttp_csrf.csrf_protect - pretection with csrf
+        # @aiohttp_csrf.csrf_exempt - no protection with csrf
+
     setup_routes(app)
     logger.debug('Routes were setup')
 
     setup_session(app, storage)
     logger.debug('Storage was setup')
 
-    setup_csrf(app, 'csrf_storage')
+    setup_csrf_protection(app)
     logger.debug('csrf protection was setup')
 
-    aioreloader.start()
+    # aioreloader.start()
     logger.debug('Start with code reload')
 
     web.run_app(app, port=8000)
