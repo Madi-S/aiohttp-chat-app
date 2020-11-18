@@ -7,6 +7,10 @@ body {
   box-sizing: border-box;
 }
 
+* {
+  
+}
+
 input[type="message"] {
   width: 100%;
   padding: 15px;
