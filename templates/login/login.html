@@ -28,5 +28,10 @@
         </div>
     </form>     
 </div>    
+{% if alert %}
+    <script type="text/javascript">
+    alert( {{ reason }} );
+    </script> 
+{% endif %}
 </body>    
 </html>   

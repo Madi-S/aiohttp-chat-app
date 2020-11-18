@@ -43,10 +43,27 @@ def check_cookies(f):
     return inner
 
 
+'''
+
+['ATTRS', 'POST_METHODS',
+    '_abc_impl', '_cache', '_client_max_size', '_content_dict', '_content_type', '_headers', '_http_date', '_is_protocol',
+     '_loop', '_match_info', '_message', '_method', '_parse_content_type', '_payload', '_payload_writer', '_post', '_prepare_hook',
+      '_protocol', '_read_bytes', '_rel_url', '_state', '_stored_content_type', '_task', '_transport_peername', '_transport_sslcontext', 
+      '_version', 'app', 'body_exists', 'can_read_body', 'charset', 'clear', 'clone', 'config_dict', 'content', 'content_length',
+       'content_type', 'cookies', 'forwarded', 'get', 'has_body', 'headers', 'host', 'http_range', 'if_modified_since',
+        'if_range', 'if_unmodified_since', 'items', 'json', 'keep_alive', 'keys', 'loop', 'match_info', 'message', 'method',
+         'multipart', 'path', 'path_qs', 'pop', 'popitem', 'post', 'protocol', 'query', 'query_string', 'raw_headers', 
+         'raw_path', 'read', 'rel_url', 'release', 'remote', 'scheme', 'secure', 'setdefault', 'task', 'text', 'transport',
+          'update', 'url', 'values', 'version', 'writer']
+'''
+
+
 @log
 @csrf_protect
 @template('login/login.html')
 async def get_login(request):
+    print(request.raw_headers)
+    print(request.has_body)
     token = await generate_token(request)
 
     return {'field_name': FORM_FIELD_NAME, 'token': token}
@@ -90,7 +107,7 @@ async def post_login(request):
             session['user_id'] = (form['username'], form['password'])
             raise web.HTTPFound('/chat')
 
-        return web.HTTPFound('/register', text=f'User {form["username"]} already exists',)
+        return web.HTTPFound('/register')
 
     # Request came from login page
     else:
@@ -101,7 +118,7 @@ async def post_login(request):
             session['user_id'] = (form['username'], form['password'])
             raise web.HTTPFound('/chat')
 
-        return web.HTTPFound('/login', text=f'Username/Password pair does not match, or username {form["username"]} does not exist')
+        return web.HTTPFound('/login')
 
 
 @log
