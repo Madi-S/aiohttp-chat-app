@@ -44,7 +44,7 @@ def check_cookies(f):
 
 
 @log
-# @csrf_protect
+@csrf_protect
 @template('login/login.html')
 async def get_login(request):
     token = await generate_token(request)
@@ -53,7 +53,7 @@ async def get_login(request):
 
 
 @log
-# @csrf_protect
+@csrf_protect
 @template('login/register.html')
 async def get_register(request):
     token = await generate_token(request)
@@ -62,7 +62,7 @@ async def get_register(request):
 
 
 @log
-# @csrf_protect
+@csrf_protect
 async def post_login(request):
     # If user's inputs are satisfying DB -> redirect to chat
     # If user's inputs are NOT satisfying DB -> return bad response

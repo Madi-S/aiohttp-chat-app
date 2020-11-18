@@ -69,7 +69,7 @@ def main():
         aiohttp_csrf.setup(app, policy=csrf_policy, storage=csrf_storage,
                            error_renderer=custom_async_error_handler)
 
-        app.middlewares.append(aiohttp_csrf.csrf_middleware)
+        # app.middlewares.append(aiohttp_csrf.csrf_middleware)
 
         # Using middlewares, all handlers will be protected
         # app.middlewares.append(aiohttp_csrf.csrf_middleware)

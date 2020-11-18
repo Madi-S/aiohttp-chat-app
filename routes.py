@@ -10,7 +10,8 @@ routes = [('GET', '/login', get_login),
           ('GET', '/chat', get_chat),
           ('POST', '/send', post_send),
           ('POST', '/recover', post_recover),
-          ('*', '/{tail:.*}', handle_all)]
+          # ('*', '/{tail:.*}', handle_all)
+          ]
 
 
 def setup_routes(app):
