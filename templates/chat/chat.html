@@ -18,10 +18,10 @@
     <br>
     {%  for msg in msgs %}
     <fieldset>
-    <legend>From: {{  msg[1] }}</legend>
-    <p>Message: {{  msg[2] }}</li>
-    <p>Time sent: {{ msg[3] }}</p>
-    <p>Message id: {{ msg[0] }}</p>
+    <legend>{{  msg[1] }}</legend>
+    <p>{{  msg[2] }}</li>
+    <p align="right">{{ msg[3] }}</p>
+    <p align="right">Message id: {{ msg[0] }}</p>
     </fieldset>
     <br><br>
     {% endfor %}
@@ -31,9 +31,9 @@
 
 <div class="container">
     <p>
-        <form method="post" action="send">   
-            <textarea type="message" name="message" maxlength="2000" cols="207" align="center" rows="15" tabindex="101" placeholder="Type your messsage here ..." autocomplete="off"></textarea>            
-            <br>
+        <form method="post" action="send">
+            <textarea type="message" name="message" wrap="off" minlength="2" maxlength="2000" cols="117" align="center" rows="15" tabindex="101" placeholder="Remember be polite!" autocomplete="off" spellcheck="true" required></textarea>            
+            <br><br>
             <input type="submit" class="button" value="Send">
         </form>       
     </p>

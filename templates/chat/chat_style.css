@@ -17,6 +17,15 @@ input[type="message"] {
   font-size: 18px;
 }
 
+textarea {
+  margin-left: 5%;
+  margin-right: 5%;
+  font-size: 30px;
+  border: 3px solid #4caf50;
+  outline: none;
+  overflow: auto;
+  resize: vertical;
+}
 
 .container {
   padding: 35px;
@@ -25,12 +34,6 @@ input[type="message"] {
   background-color: white;
   font-size: 18px;
   word-break: break-all;
-}
-
-.textbox {
-  margin-left: 5%;
-  margin-right: 5%;
-  font-size: 30px;
 }
 
 .signoutButton {
@@ -54,4 +57,6 @@ input[type="message"] {
   width: 100%;
   font-size: 15px;
   opacity: 0.9;
+  height: 100px;
+  max-height: 100px;
 }
