@@ -17,17 +17,13 @@ input[type="message"] {
   font-size: 18px;
 }
 
-.messages {
-  font-size: 14px;
-  padding: 10px 20px;
-}
-
 .container {
-  padding: 16px;
+  padding: 35px;
   margin-left: 5%;
   margin-right: 5%;
   background-color: white;
   font-size: 18px;
+  word-break: break-all;
 }
 
 .textbox {

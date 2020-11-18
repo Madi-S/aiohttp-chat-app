@@ -15,13 +15,15 @@
 <br><br><br>
 
 <div class="container">
+    <br>
     {%  for msg in msgs %}
-    <ul>
-        <li>From: {{  msg[1] }}</li>
-        <li>Message: {{  msg[2] }}</li>
-        <li>Time sent: {{ msg[3] }}</li>
-        <li>Message id: {{ msg[0] }}</li>
-    </ul>
+    <fieldset>
+    <legend>From: {{  msg[1] }}</legend>
+    <p>Message: {{  msg[2] }}</li>
+    <p>Time sent: {{ msg[3] }}</p>
+    <p>Message id: {{ msg[0] }}</p>
+    </fieldset>
+    <br><br>
     {% endfor %}
 </div>
 
