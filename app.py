@@ -64,7 +64,7 @@ def main():
         csrf_policy = aiohttp_csrf.policy.FormPolicy(FORM_FIELD_NAME)
         csrf_storage = aiohttp_csrf.storage.CookieStorage(COOKIE_NAME)
 
-        # aiohttp_csrf.token_generator.HashedTokenGenerator(SECRET_PHRASE)
+        aiohttp_csrf.token_generator.HashedTokenGenerator(SECRET_PHRASE)
 
         aiohttp_csrf.setup(app, policy=csrf_policy, storage=csrf_storage,
                            error_renderer=custom_async_error_handler)
