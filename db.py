@@ -1,6 +1,8 @@
 import aiomysql
 import asyncio
 
+from config import DB_HOST, DB_PORT, DB_USER, DB_PWD, DB_NAME
+
 TABLE_USERS_NAME = 'chat_users'
 INSERT_USER_COMMAND = 'INSERT INTO chat_users (username, pwd) VALUES (%s, %s);'
 CHECK_USER_COMMAND = 'SELECT EXISTS (SELECT 1 FROM chat_users WHERE username = %s LIMIT 1);'
@@ -16,11 +18,11 @@ GET_10_LAST_MSGS_COMMAND = 'SELECT * FROM (SELECT * FROM chat_messages ORDER BY 
 async def start_db(app):
     loop = asyncio.get_event_loop()
     db_pool = await aiomysql.create_pool(
-        host='localhost',
-        port=3306,
-        user='root',
-        password='1234',
-        db='webchat',
+        host=DB_HOST,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PWD,
+        db=DB_NAME,
         loop=loop,
     )
 

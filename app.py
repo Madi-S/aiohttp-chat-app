@@ -12,16 +12,16 @@ from routes import setup_routes
 from db import start_db, close_db
 
 from py_settings import log, logger
-from config import FORM_FIELD_NAME, COOKIE_NAME, SECRET_PHRASE
+from config import FORM_FIELD_NAME, COOKIE_NAME, SECRET_PHRASE, REDIS_ADDR, TMPL_FOLDER, STATIC_ROOT_URL, APP_PORT
 
 
 @log
 def main():
     app = web.Application()
 
-    aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('templates'))
-    app['static_root_url'] = '/static'
-    app.router.add_static('/static', 'static', name='static')
+    aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(TMPL_FOLDER))
+    app['static_root_url'] = STATIC_ROOT_URL
+    #app.router.add_static('/static', 'static', name='static')
 
     app.on_startup.append(start_db)
     app.on_cleanup.append(close_db)
@@ -33,7 +33,7 @@ def main():
         from aiohttp_session.redis_storage import RedisStorage
 
         async def make_redis_pool(app):
-            return await aioredis.create_redis_pool(('127.0.0.1', '6379'), db=5, timeout=5)
+            return await aioredis.create_redis_pool(REDIS_ADDR, timeout=5)
 
         async def dispose_redis_pool(app):
             redis_pool.close()
@@ -90,7 +90,7 @@ def main():
     # aioreloader.start()
     logger.debug('Start with code reload')
 
-    web.run_app(app, port=8000)
+    web.run_app(app, port=APP_PORT)
 
 
 if __name__ == '__main__':
