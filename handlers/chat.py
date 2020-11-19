@@ -1,3 +1,5 @@
+import time
+
 from aiohttp_jinja2 import template
 from aiohttp import web
 from aiohttp_session import new_session, get_session
@@ -12,17 +14,19 @@ from time import strftime
 async def get_chat(request):
     session = await get_session(request)
 
-    if 'error' in session:
-        del session['error'] 
-
     if not session.get('user_id'):
         print('Not allowing user to enter chat. Redirecting user to login page')
         raise web.HTTPFound('/register')
 
     print('Allowing user to enter chat')
 
+    error = session.get('error')
     msgs = await get_msgs(request.app['pool'])
-    return {'msgs': msgs}
+
+    if 'error' in session:
+        del session['error']
+
+    return {'msgs': msgs, 'error': error}
 
 
 async def post_send(request):
@@ -30,18 +34,28 @@ async def post_send(request):
     session = await get_session(request)
 
     if 'error' in session:
-        del session['error'] 
+        del session['error']
 
-    if session.get('user_id', None):
+    if session.get('user_id'):
+        user_waited = session.get('user_waited', 30)
 
-        msg = form.get('message', 'None')
-        if len(msg) <= 2000:
-            from_user = session.get('user_id')[0]
-            time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        if (time.time() - user_waited >= 30):
+            msg = form.get('message', 'None')
+            if len(msg) <= 2000:
+                from_user = session.get('user_id')[0]
+                msg_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-            await add_msg(request.app['pool'], (from_user, msg, time))
+                await add_msg(request.app['pool'], (from_user, msg, msg_date))
 
-        raise web.HTTPFound('/chat')
+                # Set user's last message time
+                session['user_waited'] = time.time()
+
+                raise web.HTTPFound('/chat')
+
+        else:
+            session['error'] = True
+            print(f'User {session["user_id"][0]} sends too many messsages')
+            raise web.HTTPFound('/chat')
 
     else:
         print(

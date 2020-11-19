@@ -65,7 +65,7 @@ async def get_login(request):
     token = await generate_token(request)
     session = await get_session(request)
 
-    error = session.get('error', None)
+    error = session.get('error')
     if 'error' in session:
         del session['error']
 
@@ -79,7 +79,7 @@ async def get_register(request):
     token = await generate_token(request)
     session = await get_session(request)
 
-    error = session.get('error', None)
+    error = session.get('error')
     if 'error' in session:
         del session['error']
 
