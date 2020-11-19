@@ -42,5 +42,10 @@
         return true;
     }
   </script>
+  {% if error %}
+  <script type="text/javascript">
+    alert('User with such login already exist. Come up with another username');
+  </script> 
+  {% endif %}
 </body>
 </html>

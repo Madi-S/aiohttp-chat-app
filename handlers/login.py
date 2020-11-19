@@ -62,11 +62,14 @@ def check_cookies(f):
 @csrf_protect
 @template('login/login.html')
 async def get_login(request):
-    print(request.raw_headers)
-    print(request.has_body)
     token = await generate_token(request)
+    session = await get_session(request)
 
-    return {'field_name': FORM_FIELD_NAME, 'token': token}
+    error = session.get('error', None)
+    if 'error' in session:
+        del session['error']
+
+    return {'field_name': FORM_FIELD_NAME, 'token': token, 'error': error}
 
 
 @log
@@ -74,8 +77,13 @@ async def get_login(request):
 @template('login/register.html')
 async def get_register(request):
     token = await generate_token(request)
+    session = await get_session(request)
 
-    return {'field_name': FORM_FIELD_NAME, 'token': token}
+    error = session.get('error', None)
+    if 'error' in session:
+        del session['error']
+
+    return {'field_name': FORM_FIELD_NAME, 'token': token, 'error': error}
 
 
 @log
@@ -85,6 +93,9 @@ async def post_login(request):
     # If user's inputs are NOT satisfying DB -> return bad response
     form = await request.post()
     session = await get_session(request)
+
+    if 'error' in session:
+        del session['error']
 
     pool = request.app['pool']
     data = form
@@ -107,6 +118,7 @@ async def post_login(request):
             session['user_id'] = (form['username'], form['password'])
             raise web.HTTPFound('/chat')
 
+        session['error'] = True
         return web.HTTPFound('/register')
 
     # Request came from login page
@@ -118,6 +130,8 @@ async def post_login(request):
             session['user_id'] = (form['username'], form['password'])
             raise web.HTTPFound('/chat')
 
+        # If login & password pair do not match or user with such login does not exist
+        session['error'] = True
         return web.HTTPFound('/login')
 
 
@@ -127,6 +141,8 @@ async def post_logout(request):
     print(f'User {session["user_id"]} has been deleted from session storage')
     del session['user_id']
     del session['remember_me']
+    if 'error' in session:
+        del session['error']
 
     raise web.HTTPFound('/login', text='Successful logout')
 

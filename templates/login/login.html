@@ -28,9 +28,9 @@
         </div>
     </form>     
 </div>    
-{% if alert %}
+{% if error %}
     <script type="text/javascript">
-    alert( {{ reason }} );
+        alert('Username & Password pair do not match or user with such login does not exist');
     </script> 
 {% endif %}
 </body>    

@@ -12,6 +12,9 @@ from time import strftime
 async def get_chat(request):
     session = await get_session(request)
 
+    if 'error' in session:
+        del session['error'] 
+
     if not session.get('user_id'):
         print('Not allowing user to enter chat. Redirecting user to login page')
         raise web.HTTPFound('/register')
@@ -26,15 +29,25 @@ async def post_send(request):
     form = await request.post()
     session = await get_session(request)
 
-    msg = form.get('message', 'None')
-    if len(msg) <= 2000:
-        from_user = session.get('user_id')[0]
-        time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    if 'error' in session:
+        del session['error'] 
 
-        await add_msg(request.app['pool'], (from_user, msg, time))
-    
+    if session.get('user_id', None):
 
-    raise web.HTTPFound('/chat')
+        msg = form.get('message', 'None')
+        if len(msg) <= 2000:
+            from_user = session.get('user_id')[0]
+            time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            await add_msg(request.app['pool'], (from_user, msg, time))
+
+        raise web.HTTPFound('/chat')
+
+    else:
+        print(
+            'User wants to send messsage withoug logging in. Redirecting to the login page')
+
+        raise web.HTTPFound('/login')
 
 
 async def handle_all(request):
