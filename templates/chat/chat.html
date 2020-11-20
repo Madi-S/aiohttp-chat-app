@@ -9,7 +9,7 @@
 <body>
 
     <form align="right" method="post" action="logout">
-        <input type="submit" class="signoutButton" value="Sign out">
+        <input type="submit" class="signoutButton" value="Sign out" />
     </form>
 
 <br><br><br>
@@ -22,6 +22,10 @@
     <p style="word-break: break-all">{{  msg[2] }}</li>
     <p align="right">{{ msg[3] }}</p>
     <p align="right">Message id: {{ msg[0] }}</p>
+    <form mehotd="post" action="chat">
+        <p><input type="submit" name="like" class="signoutButton" value="❤️ Like "/> {{ msg[4] }}} </p>
+        <input type="hidden" name="msg_id" value="{{ msg[4] }}}" />
+    </form>
     </fieldset>
     <br><br>
     {% endfor %}
@@ -33,7 +37,7 @@
     <form method="post" action="send">
         <textarea type="message" class="inside" name="message" wrap="off" minlength="2" maxlength="2000" cols="117" align="center" rows="15" tabindex="101" placeholder="Remember be polite!" autocomplete="off" spellcheck="true" required></textarea>            
         <br><br>
-        <input type="submit" class="button" value="Send">
+        <input type="submit" class="button" value="Send" />
     </form>       
 </div>
 

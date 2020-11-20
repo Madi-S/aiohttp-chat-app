@@ -4,7 +4,7 @@ from aiohttp_jinja2 import template
 from aiohttp import web
 from aiohttp_session import new_session, get_session
 
-from db import get_msgs, add_msg
+from db import get_msgs, add_msg, like_msg, user_liked
 
 from datetime import datetime
 from time import strftime
@@ -29,7 +29,11 @@ async def get_chat(request):
     return {'msgs': msgs, 'error': error}
 
 
-async def post_send(request):
+async def post_like(request):
+    session = await get_session(request)
+
+
+async def post_chat(request):
     form = await request.post()
     session = await get_session(request)
 
@@ -37,24 +41,45 @@ async def post_send(request):
         del session['error']
 
     if session.get('user_id'):
-        user_waited = session.get('user_waited', 30)
 
-        if (time.time() - user_waited >= 30):
-            msg = form.get('message', 'None')
-            if len(msg) <= 2000:
-                from_user = session.get('user_id')[0]
-                msg_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # For both
+        pool = request.app['pool']
+        from_user = session.get('user_id')[0]
 
-                await add_msg(request.app['pool'], (from_user, msg, msg_date))
+        # For post sending messages
+        msg_id = form.get('msg_id')
 
-                # Set user's last message time
-                session['user_waited'] = time.time()
+        # For post liking message
+        like = form.get('like')
+        msg = form.get('message')
 
+        if msg:
+            user_waited = session.get('user_waited', 30)
+
+            if (time.time() - user_waited >= 30):
+                if len(msg) <= 2000:
+                    msg_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+                    await add_msg(pool, (from_user, msg, msg_date))
+
+                    # Set user's last message time
+                    session['user_waited'] = time.time()
+
+                    raise web.HTTPFound('/chat')
+
+            else:
+                session['error'] = True
+                print(f'User {session["user_id"][0]} sends too many messsages')
                 raise web.HTTPFound('/chat')
 
+        elif like and form.get('msg_id'):
+            if not await user_liked:
+                await like_msg(pool, msg_id)
+
+            
+
+        # If something weird happened
         else:
-            session['error'] = True
-            print(f'User {session["user_id"][0]} sends too many messsages')
             raise web.HTTPFound('/chat')
 
     else:
