@@ -29,15 +29,14 @@
 
 <br><br><br><br><br><br>
 
-<div class="container">
-    <p>
-        <form method="post" action="send">
-            <textarea type="message" name="message" wrap="off" minlength="2" maxlength="2000" cols="117" align="center" rows="15" tabindex="101" placeholder="Remember be polite!" autocomplete="off" spellcheck="true" required></textarea>            
-            <br><br>
-            <input type="submit" class="button" value="Send">
-        </form>       
-    </p>
+<div class="container wrap">
+    <form method="post" action="send">
+        <textarea type="message" class="inside" name="message" wrap="off" minlength="2" maxlength="2000" cols="117" align="center" rows="15" tabindex="101" placeholder="Remember be polite!" autocomplete="off" spellcheck="true" required></textarea>            
+        <br><br>
+        <input type="submit" class="button" value="Send">
+    </form>       
 </div>
+
 {% if error %}
 <script type="text/javascript">
   alert('Wait 30 seconds before sending another message');

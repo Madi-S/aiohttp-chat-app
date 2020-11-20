@@ -7,10 +7,6 @@ body {
   box-sizing: border-box;
 }
 
-* {
-  
-}
-
 input[type="message"] {
   width: 100%;
   padding: 15px;
@@ -28,7 +24,7 @@ textarea {
   border: 3px solid #4caf50;
   outline: none;
   overflow: auto;
-  resize: vertical;
+  resize: both;
 }
 
 .container {
