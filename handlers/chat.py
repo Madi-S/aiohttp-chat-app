@@ -4,7 +4,7 @@ from aiohttp_jinja2 import template
 from aiohttp import web
 from aiohttp_session import new_session, get_session
 
-from db import get_msgs, add_msg, like_msg, user_liked
+from db import get_msgs, add_msg, like_dislike_msg
 
 from datetime import datetime
 from time import strftime
@@ -29,10 +29,6 @@ async def get_chat(request):
     return {'msgs': msgs, 'error': error}
 
 
-async def post_like(request):
-    session = await get_session(request)
-
-
 async def post_chat(request):
     form = await request.post()
     session = await get_session(request)
@@ -47,12 +43,13 @@ async def post_chat(request):
         from_user = session.get('user_id')[0]
 
         # For post sending messages
-        msg_id = form.get('msg_id')
-
-        # For post liking message
-        like = form.get('like')
         msg = form.get('message')
 
+        # For post liking message
+        msg_id = form.get('msg_id')
+        like = form.get('like')
+
+        # If it was post method to send a message
         if msg:
             user_waited = session.get('user_waited', 30)
 
@@ -72,11 +69,10 @@ async def post_chat(request):
                 print(f'User {session["user_id"][0]} sends too many messsages')
                 raise web.HTTPFound('/chat')
 
-        elif like and form.get('msg_id'):
-            if not await user_liked:
-                await like_msg(pool, msg_id)
-
-            
+        # If it was post method to like a message
+        elif like and msg_id:
+            result = await like_dislike_msg(pool, msg_id, username)
+            print(result)
 
         # If something weird happened
         else:

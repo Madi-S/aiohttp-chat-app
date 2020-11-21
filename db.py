@@ -16,8 +16,9 @@ GET_10_LAST_MSGS_COMMAND = 'SELECT * FROM (SELECT * FROM chat_messages ORDER BY 
 
 
 TABLE_LIKES_NAME = 'messages_liked'
-CHECK_USER_LIKED = 'SELECT * FROM messages_liked WHERE username = %s AND msg_id = %s'
-LIKE_MSG_COMMAND = 'SELECT COUNT(like_id) FROM messages_liked WHERE msg_id = %s'
+CHECK_USER_LIKED_COMMAND = 'SELECT * FROM messages_liked WHERE username = %s AND msg_id = %s'
+LIKE_MSG_COMMAND = 'INSERT INTO messages_liked (username, msg_id) VALUES (%s, %s)'
+DISLIKE_MSG_COMMAND = 'DELETE FROM messages_liked WHERE username = %s and msg_id = %s'
 
 
 async def start_db(app):
@@ -56,34 +57,25 @@ async def add_msg(pool, data):
             await cur.execute(INSERT_MSG_COMMAND, data)
             await conn.commit()
 
-            return True
+            return 'Message added'
 
 
-async def like_msg(pool, msg_id, username):
+async def like_dislike_msg(pool, msg_id, username):
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
-            await cur.execute(LIKE_MSG_COMMAND, msg_id)
+            await cur.execute(CHECK_USER_LIKED_COMMAND, username, msg_id)
+            user_liked = cur.fetchone()
+            print(user_liked)
+
+            if not user_liked:
+                await cur.execute(LIKE_MSG_COMMAND, username, msg_id)
+                await conn.commit()
+                return 'Liked'
+            
+            await cur.execute(DISLIKE_MSG_COMMAND, username, msg_id)
             await conn.commit()
+            return 'Disliked'
 
-            return True
-
-
-async def dislike_msg(pool, msg_id, username):
-    async with pool.acquire() as conn:
-        async with conn.cursor() as cur:
-
-
-            return True
-
-
-async def user_liked(pool, msg_id, username):
-    async with pool.acquire() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute(CHECK_USER_LIKED, username, msg_id)
-            liked = await cur.fetchone()
-            print(bool(liked))
-
-            return liked
 
 
 async def user_checked(pool, data: tuple, register=True):
