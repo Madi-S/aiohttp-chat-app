@@ -12,13 +12,14 @@ DELETE_USER_COMMAND = 'DELETE FROM chat_users WHERE username = %s'
 
 TABLE_MESSAGES_NAME = 'chat_messages'
 INSERT_MSG_COMMAND = 'INSERT INTO chat_messages (username, msg, time_sent) VALUES (%s, %s, %s)'
-GET_10_LAST_MSGS_COMMAND = 'SELECT * FROM (SELECT * FROM chat_messages ORDER BY id DESC LIMIT 10)Var1 ORDER BY id ASC'
+GET_10_LAST_MSGS_COMMAND = 'SELECT * FROM (SELECT * FROM chat_messages ORDER BY msg_id DESC LIMIT 10)Var1 ORDER BY msg_id ASC'
 
 
 TABLE_LIKES_NAME = 'messages_liked'
 CHECK_USER_LIKED_COMMAND = 'SELECT * FROM messages_liked WHERE username = %s AND msg_id = %s'
 LIKE_MSG_COMMAND = 'INSERT INTO messages_liked (username, msg_id) VALUES (%s, %s)'
 DISLIKE_MSG_COMMAND = 'DELETE FROM messages_liked WHERE username = %s and msg_id = %s'
+GET_LIKES_COUNT_COMMAND = 'SELECT COUNT(msg_id) FROM messages_liked WHERE msg_id = %s'
 
 
 async def start_db(app):
@@ -60,22 +61,33 @@ async def add_msg(pool, data):
             return 'Message added'
 
 
+async def get_likes_count(pool, msgs):
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            likes = []
+            for msg in msgs:
+                await cur.execute(GET_LIKES_COUNT_COMMAND, (msg[0], ))
+                likes.append(await cur.fetchall())
+
+            print(likes)
+            return likes
+
+
 async def like_dislike_msg(pool, msg_id, username):
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
-            await cur.execute(CHECK_USER_LIKED_COMMAND, username, msg_id)
+            await cur.execute(CHECK_USER_LIKED_COMMAND, (username, msg_id))
             user_liked = cur.fetchone()
             print(user_liked)
 
             if not user_liked:
-                await cur.execute(LIKE_MSG_COMMAND, username, msg_id)
+                await cur.execute(LIKE_MSG_COMMAND, (username, msg_id))
                 await conn.commit()
                 return 'Liked'
-            
-            await cur.execute(DISLIKE_MSG_COMMAND, username, msg_id)
+
+            await cur.execute(DISLIKE_MSG_COMMAND, (username, msg_id))
             await conn.commit()
             return 'Disliked'
-
 
 
 async def user_checked(pool, data: tuple, register=True):

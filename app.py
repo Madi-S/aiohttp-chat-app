@@ -21,7 +21,7 @@ def main():
 
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(TMPL_FOLDER))
     app['static_root_url'] = STATIC_ROOT_URL
-    #app.router.add_static('/static', 'static', name='static')
+    app.router.add_static('/static', 'static', name='static')
 
     app.on_startup.append(start_db)
     app.on_cleanup.append(close_db)

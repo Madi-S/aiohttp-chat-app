@@ -3,7 +3,7 @@ USE webchat;
 
 
 CREATE TABLE IF NOT EXISTS chat_users(
-    id serial,
+    id MEDIUMINT NOT NULL AUTO_INCREMENT,
     username VARCHAR(21) NOT NULL,
     pwd VARCHAR(31) NOT NULL,
     pwd_reset_token VARCHAR(100),
@@ -19,7 +19,7 @@ VALUES ('KumysPower', 'KumysSila123'),
 
 
 CREATE TABLE IF NOT EXISTS chat_messages(
-    msg_id INT NOT NULL,
+    msg_id MEDIUMINT NOT NULL AUTO_INCREMENT,
     username VARCHAR(21) NOT NULL,
     msg VARCHAR(2000) NOT NULL,
     time_sent DATETIME NOT NULL,
@@ -30,8 +30,8 @@ VALUES ('Admin', 'Hi Slaves', '9999-12-31 23:59:59');
 
 
 CREATE TABLE messages_liked(
-    like_id INT NOT NULL,
-    msg_id int NOT NULL,
+    like_id MEDIUMINT NOT NULL AUTO_INCREMENT,
+    msg_id MEDIUMINT NOT NULL,
     username VARCHAR(21) NOT NULL,
     PRIMARY KEY (like_id),
     FOREIGN KEY (msg_id) REFERENCES chat_messages(msg_id),
