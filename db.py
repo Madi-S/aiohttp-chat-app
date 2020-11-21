@@ -67,9 +67,8 @@ async def get_likes_count(pool, msgs):
             likes = []
             for msg in msgs:
                 await cur.execute(GET_LIKES_COUNT_COMMAND, (msg[0], ))
-                likes.append(await cur.fetchall())
+                likes.append(await cur.fetchone())
 
-            print(likes)
             return likes
 
 
