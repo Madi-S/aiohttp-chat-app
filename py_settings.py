@@ -5,7 +5,7 @@ formatter = logging.Formatter(
     style='{', fmt='{levelname} - {name} - {asctime} - {pathname} - {lineno} - {message}')
 
 handler = logging.StreamHandler()
-handler.setLevel(logging.DEBUG)
+handler.setLevel(logging.WARNING)
 handler.setFormatter(formatter)
 
 logger = logging.getLogger(__name__)

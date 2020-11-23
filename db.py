@@ -40,7 +40,7 @@ async def close_db(app):
     pool = app['pool']
     pool.close()
     await pool.wait_closed()
-    print('closing db')
+    print('Closing DB')
 
 
 async def get_msgs(pool):
@@ -76,8 +76,7 @@ async def like_dislike_msg(pool, msg_id, username):
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
             await cur.execute(CHECK_USER_LIKED_COMMAND, (username, msg_id))
-            user_liked = cur.fetchone()
-            print(user_liked)
+            user_liked = await cur.fetchone()
 
             if not user_liked:
                 await cur.execute(LIKE_MSG_COMMAND, (username, msg_id))

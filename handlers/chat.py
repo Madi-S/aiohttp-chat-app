@@ -78,7 +78,8 @@ async def post_chat(request):
 
         # If it was post method to like a message
         elif like and msg_id:
-            result = await like_dislike_msg(pool, msg_id, from_user)
+            result = await like_dislike_msg(pool, int(msg_id), from_user)
+            print(result)
 
             raise web.HTTPFound('/chat')
 
