@@ -10,65 +10,57 @@ from py_settings import log, logger
 from config import FORM_FIELD_NAME
 
 
-# Decorator to check user's cookies (if he/she already loginned) to allow him/her to visit the page
-@log
+# Decorator to check user's cookies (if he/she already loginned) to straightly redirect him to the /chat page
 def check_cookies(f):
     async def inner(request, *args, **kwargs):
         session = await new_session(request)
-
         if session.get('user_id') and session.get('remember_me'):
             print(
                 'Redirecting user straight to the chat because of saved cookies and remember me checkbox')
             raise web.HTTPFound('/chat')
-
         return await f(request, *args, **kwargs)
 
     return inner
 
 
-# Decorator to check if any errors must be displayed:
-def check_error(f):
+# Decorator to automatically check if any errors must be displayed and the delete them:
+def check_del_error(f):
     async def inner(request, *args, **kwargs):
         session = await get_session(request)
         error = session.get('error')
-
         if error:
             del session['error']
+        return await f(request, error, *args, **kwargs)
+
+    return inner
 
 
 # Handler for /login - show the login.html page with the help of jinja templates, csrf protection enabled
 @log
 @csrf_protect
+@check_cookies
+@check_del_error
 @template('login/login.html')
-async def get_login(request):
+async def get_login(request, error):
     token = await generate_token(request)
-    session = await get_session(request)
-
-    error = session.get('error')
-    if 'error' in session:
-        del session['error']
-
     return {'field_name': FORM_FIELD_NAME, 'token': token, 'error': error}
 
 
 # Handler for /register - show the register.html page with the help of jinja templates, csrf protection enabled
 @log
 @csrf_protect
+@check_cookies
+@check_del_error
 @template('login/register.html')
 async def get_register(request):
     token = await generate_token(request)
-    session = await get_session(request)
-
-    error = session.get('error')
-    if 'error' in session:
-        del session['error']
-
     return {'field_name': FORM_FIELD_NAME, 'token': token, 'error': error}
 
 
 # Post /login method to check if user entered satisfying username&password to register or login
 @log
 @csrf_protect
+@check_del_error
 async def post_login(request):
     # If user's inputs are satisfying DB -> redirect to chat
     # If user's inputs are NOT satisfying DB -> return bad response
@@ -77,9 +69,6 @@ async def post_login(request):
 
     pool = request.app['pool']
     username, pwd = form.get('username'), form.get('password')
-
-    if 'error' in session:
-        del session['error']
 
     # If user wants to be logged-in automatically
     if form.get('remember', None):
@@ -119,20 +108,19 @@ async def post_login(request):
 
 # Post method to logout - delete all user's cookies and redirect him/her to /login page
 @log
+@check_del_error
 async def post_logout(request):
     session = await get_session(request)
     print(f'User {session["user_id"]} has been deleted from session storage')
     del session['user_id']
     del session['remember_me']
-    if 'error' in session:
-        del session['error']
 
     raise web.HTTPFound('/login', text='Successful logout')
 
+
 # Actually, inacessible method for normal humans
-
-
 @log
+@check_del_error
 async def get_logout(request):
     raise web.HTTPFound('/login', text='Login first')
 
@@ -140,6 +128,7 @@ async def get_logout(request):
 # !!!TODO!!!:
 # Method to recover a password
 @log
+@check_del_error
 async def post_recover(request):
     # recover user password by its user recovery link in the database `pwd_reset_token`
     pass
