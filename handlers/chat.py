@@ -9,9 +9,13 @@ from db import get_msgs, add_msg, like_dislike_msg, get_likes_count
 from datetime import datetime
 from time import strftime
 
+from web_decorators import check_del_error
 
+
+# Handler to display the main chat page
 @template('chat/chat.html')
-async def get_chat(request):
+@check_del_error
+async def get_chat(request, error):
     session = await get_session(request)
 
     if not session.get('user_id'):
@@ -21,22 +25,16 @@ async def get_chat(request):
     print('Allowing user to enter chat')
 
     pool = request.app['pool']
-    error = session.get('error')
     msgs = await get_msgs(pool)
     likes_count = await get_likes_count(pool, msgs)
-
-    if 'error' in session:
-        del session['error']
 
     return {'msgs': msgs, 'likes': likes_count, 'error': error}
 
 
+# Handler to send messages and like/dislike a message
 async def post_chat(request):
     form = await request.post()
     session = await get_session(request)
-
-    if 'error' in session:
-        del session['error']
 
     if session.get('user_id'):
 
@@ -98,5 +96,4 @@ async def post_chat(request):
 # Handler that handles everything -> basically redirects form * to /chat
 async def handle_all(request):
     print('Redirecting user to /chat')
-
     raise web.HTTPFound('/chat')

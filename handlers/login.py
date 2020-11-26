@@ -9,35 +9,12 @@ from py_settings import log, logger
 
 from config import FORM_FIELD_NAME
 
-
-# Decorator to check user's cookies (if he/she already loginned) to straightly redirect him to the /chat page
-def check_cookies(f):
-    async def inner(request, *args, **kwargs):
-        session = await get_session(request)
-        if session.get('user_id') and session.get('remember_me'):
-            print('Redirecting user straight to the chat: saved cookies and remember me')
-            raise web.HTTPFound('/chat')
-        return await f(request, *args, **kwargs)
-
-    return inner
-
-
-# Decorator to automatically check if any errors must be displayed and the delete them:
-def check_del_error(f):
-    async def inner(request, *args, **kwargs):
-        session = await get_session(request)
-        error = session.get('error')
-        if 'error' in session:
-            del session['error']
-        return await f(request, error, *args, **kwargs)
-
-    return inner
+from web_decorators import check_del_error, check_cookies
 
 
 # Handler for /login - show the login.html page with the help of jinja templates, csrf protection enabled
 @log
 @csrf_protect
-@check_cookies
 @template('login/login.html')
 @check_del_error
 async def get_login(request, error):
@@ -48,7 +25,6 @@ async def get_login(request, error):
 # Handler for /register - show the register.html page with the help of jinja templates, csrf protection enabled
 @log
 @csrf_protect
-@check_cookies
 @template('login/register.html')
 @check_del_error
 async def get_register(request, error):
@@ -59,6 +35,7 @@ async def get_register(request, error):
 # Post /login method to check if user entered satisfying username&password to register or login
 @log
 @csrf_protect
+@check_del_error
 async def post_login(request):
     # If user's inputs are satisfying DB -> redirect to chat
     # If user's inputs are NOT satisfying DB -> return bad response
@@ -106,6 +83,7 @@ async def post_login(request):
 
 # Post method to logout - delete all user's cookies and redirect him/her to /login page
 @log
+@check_del_error
 async def post_logout(request):
     session = await get_session(request)
     print(f'User {session["user_id"]} has been deleted from session storage')
@@ -117,7 +95,8 @@ async def post_logout(request):
 
 # Actually, inacessible method for normal humans
 @log
-async def get_logout(request):
+@check_del_error
+async def get_logout(request, error):
     raise web.HTTPFound('/login', text='Login first')
 
 
