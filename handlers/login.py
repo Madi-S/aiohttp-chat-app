@@ -13,10 +13,9 @@ from config import FORM_FIELD_NAME
 # Decorator to check user's cookies (if he/she already loginned) to straightly redirect him to the /chat page
 def check_cookies(f):
     async def inner(request, *args, **kwargs):
-        session = await new_session(request)
+        session = await get_session(request)
         if session.get('user_id') and session.get('remember_me'):
-            print(
-                'Redirecting user straight to the chat because of saved cookies and remember me checkbox')
+            print('Redirecting user straight to the chat: saved cookies and remember me')
             raise web.HTTPFound('/chat')
         return await f(request, *args, **kwargs)
 
@@ -28,7 +27,7 @@ def check_del_error(f):
     async def inner(request, *args, **kwargs):
         session = await get_session(request)
         error = session.get('error')
-        if error:
+        if 'error' in session:
             del session['error']
         return await f(request, error, *args, **kwargs)
 
@@ -39,8 +38,8 @@ def check_del_error(f):
 @log
 @csrf_protect
 @check_cookies
-@check_del_error
 @template('login/login.html')
+@check_del_error
 async def get_login(request, error):
     token = await generate_token(request)
     return {'field_name': FORM_FIELD_NAME, 'token': token, 'error': error}
@@ -50,9 +49,9 @@ async def get_login(request, error):
 @log
 @csrf_protect
 @check_cookies
-@check_del_error
 @template('login/register.html')
-async def get_register(request):
+@check_del_error
+async def get_register(request, error):
     token = await generate_token(request)
     return {'field_name': FORM_FIELD_NAME, 'token': token, 'error': error}
 
@@ -60,7 +59,6 @@ async def get_register(request):
 # Post /login method to check if user entered satisfying username&password to register or login
 @log
 @csrf_protect
-@check_del_error
 async def post_login(request):
     # If user's inputs are satisfying DB -> redirect to chat
     # If user's inputs are NOT satisfying DB -> return bad response
@@ -71,7 +69,7 @@ async def post_login(request):
     username, pwd = form.get('username'), form.get('password')
 
     # If user wants to be logged-in automatically
-    if form.get('remember', None):
+    if form.get('remember'):
         session['remember_me'] = True
         print('User WANTS to save his cookies')
 
@@ -108,7 +106,6 @@ async def post_login(request):
 
 # Post method to logout - delete all user's cookies and redirect him/her to /login page
 @log
-@check_del_error
 async def post_logout(request):
     session = await get_session(request)
     print(f'User {session["user_id"]} has been deleted from session storage')
@@ -120,7 +117,6 @@ async def post_logout(request):
 
 # Actually, inacessible method for normal humans
 @log
-@check_del_error
 async def get_logout(request):
     raise web.HTTPFound('/login', text='Login first')
 
