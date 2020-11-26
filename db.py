@@ -100,35 +100,35 @@ async def like_dislike_msg(pool, msg_id, username):
 
 
 # Method to check if user exists/register user/check password&login pair
-async def user_checked(pool, data: tuple, register=True):
+async def user_checked(pool, username, pwd, register=True):
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
 
             # Add user to database
             if register:
-                await cur.execute(CHECK_USER_COMMAND, (data['username'], ))
+                await cur.execute(CHECK_USER_COMMAND, (username, ))
                 user_exists = await cur.fetchone()
 
                 # Check if user's login does not exist in database
                 if not user_exists[0]:
-                    await cur.execute(INSERT_USER_COMMAND, (data['username'], data['password']))
+                    await cur.execute(INSERT_USER_COMMAND, (username, pwd))
                     await conn.commit()
 
-                    print(f'User {data} was addded to database')
+                    print(f'User {username} was addded to database')
                     return True
 
                 print(
-                    f'User {data["username"]} exists - NOT ADDED TO DATABASE')
+                    f'User {username} exists - NOT ADDED TO DATABASE')
                 return False
 
             # Check user in database
             else:
-                await cur.execute(SATISFY_COMMAND, (data['username'], data['password']))
+                await cur.execute(SATISFY_COMMAND, (username, pwd))
                 user_exists = await cur.fetchone()
 
                 # Check if username/password pair exist and satisfy db
                 if user_exists[0]:
-                    print(f'User {data["username"]} exists in - SATISFIED DB')
+                    print(f'User {username} exists in - SATISFIED DB')
                     return True
 
                 print('Login/Password pair does not match or user does not exists')

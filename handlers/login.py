@@ -10,7 +10,7 @@ from py_settings import log, logger
 from config import FORM_FIELD_NAME
 
 
-# Decorator to check user's cookies (if he/she already loginned) to allow him/her to visit the page 
+# Decorator to check user's cookies (if he/she already loginned) to allow him/her to visit the page
 @log
 def check_cookies(f):
     async def inner(request, *args, **kwargs):
@@ -24,6 +24,16 @@ def check_cookies(f):
         return await f(request, *args, **kwargs)
 
     return inner
+
+
+# Decorator to check if any errors must be displayed:
+def check_error(f):
+    async def inner(request, *args, **kwargs):
+        session = await get_session(request)
+        error = session.get('error')
+
+        if error:
+            del session['error']
 
 
 # Handler for /login - show the login.html page with the help of jinja templates, csrf protection enabled
@@ -56,7 +66,7 @@ async def get_register(request):
     return {'field_name': FORM_FIELD_NAME, 'token': token, 'error': error}
 
 
-# Post /login method to check if user entered satisfying username&password to register or login 
+# Post /login method to check if user entered satisfying username&password to register or login
 @log
 @csrf_protect
 async def post_login(request):
@@ -65,11 +75,11 @@ async def post_login(request):
     form = await request.post()
     session = await get_session(request)
 
+    pool = request.app['pool']
+    username, pwd = form.get('username'), form.get('password')
+
     if 'error' in session:
         del session['error']
-
-    pool = request.app['pool']
-    data = form
 
     # If user wants to be logged-in automatically
     if form.get('remember', None):
@@ -85,9 +95,9 @@ async def post_login(request):
     if form.get('password-repeat'):
 
         # Check if username's absence in db:
-        if await user_checked(pool, data):
-            print(f'User {form["username"]} has been added to database')
-            session['user_id'] = (form['username'], form['password'])
+        if await user_checked(pool, username, pwd):
+            print(f'User {username} has been added to database')
+            session['user_id'] = (username, pwd)
             raise web.HTTPFound('/chat')
 
         session['error'] = True
@@ -97,9 +107,9 @@ async def post_login(request):
     else:
 
         # Check user's presence in db
-        if await user_checked(pool, data, register=False):
-            print(f'User {form["username"]} has been passed login section')
-            session['user_id'] = (form['username'], form['password'])
+        if await user_checked(pool, username, pwd, register=False):
+            print(f'User {username} has been passed login section')
+            session['user_id'] = (username, pwd)
             raise web.HTTPFound('/chat')
 
         # If login & password pair do not match or user with such login does not exist
@@ -120,6 +130,8 @@ async def post_logout(request):
     raise web.HTTPFound('/login', text='Successful logout')
 
 # Actually, inacessible method for normal humans
+
+
 @log
 async def get_logout(request):
     raise web.HTTPFound('/login', text='Login first')
