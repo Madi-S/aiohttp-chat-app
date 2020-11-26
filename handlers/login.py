@@ -10,24 +10,7 @@ from py_settings import log, logger
 from config import FORM_FIELD_NAME
 
 
-# def login_required(f):
-#    async def wrapped(request, *args, **kwargs):
-#        app = request.app
-#        router = app.router
-#
-#        session = await get_session(request)
-#
-#        if 'user_id' not in session:
-#            return web.HTTPFound(router['login'].url_for())
-#
-#        user_id = session['user_id']
-#        # actually load user from your database (e.g. with aiopg)
-#        # user = DATABASE[user_id]
-#        app['user'] = user
-#        return await f(request, *args, **kwargs)
-#
-#    return wrapped
-
+# Decorator to check user's cookies (if he/she already loginned) to allow him/her to visit the page 
 @log
 def check_cookies(f):
     async def inner(request, *args, **kwargs):
@@ -43,21 +26,7 @@ def check_cookies(f):
     return inner
 
 
-'''
-
-['ATTRS', 'POST_METHODS',
-    '_abc_impl', '_cache', '_client_max_size', '_content_dict', '_content_type', '_headers', '_http_date', '_is_protocol',
-     '_loop', '_match_info', '_message', '_method', '_parse_content_type', '_payload', '_payload_writer', '_post', '_prepare_hook',
-      '_protocol', '_read_bytes', '_rel_url', '_state', '_stored_content_type', '_task', '_transport_peername', '_transport_sslcontext', 
-      '_version', 'app', 'body_exists', 'can_read_body', 'charset', 'clear', 'clone', 'config_dict', 'content', 'content_length',
-       'content_type', 'cookies', 'forwarded', 'get', 'has_body', 'headers', 'host', 'http_range', 'if_modified_since',
-        'if_range', 'if_unmodified_since', 'items', 'json', 'keep_alive', 'keys', 'loop', 'match_info', 'message', 'method',
-         'multipart', 'path', 'path_qs', 'pop', 'popitem', 'post', 'protocol', 'query', 'query_string', 'raw_headers', 
-         'raw_path', 'read', 'rel_url', 'release', 'remote', 'scheme', 'secure', 'setdefault', 'task', 'text', 'transport',
-          'update', 'url', 'values', 'version', 'writer']
-'''
-
-
+# Handler for /login - show the login.html page with the help of jinja templates, csrf protection enabled
 @log
 @csrf_protect
 @template('login/login.html')
@@ -72,6 +41,7 @@ async def get_login(request):
     return {'field_name': FORM_FIELD_NAME, 'token': token, 'error': error}
 
 
+# Handler for /register - show the register.html page with the help of jinja templates, csrf protection enabled
 @log
 @csrf_protect
 @template('login/register.html')
@@ -86,6 +56,7 @@ async def get_register(request):
     return {'field_name': FORM_FIELD_NAME, 'token': token, 'error': error}
 
 
+# Post /login method to check if user entered satisfying username&password to register or login 
 @log
 @csrf_protect
 async def post_login(request):
@@ -105,6 +76,7 @@ async def post_login(request):
         session['remember_me'] = True
         print('User WANTS to save his cookies')
 
+    # Otherwise do not check user's cookies on login
     else:
         session['remember_me'] = False
         print('User does NOT want to be logged-in automatically')
@@ -135,6 +107,7 @@ async def post_login(request):
         return web.HTTPFound('/login')
 
 
+# Post method to logout - delete all user's cookies and redirect him/her to /login page
 @log
 async def post_logout(request):
     session = await get_session(request)
@@ -146,12 +119,14 @@ async def post_logout(request):
 
     raise web.HTTPFound('/login', text='Successful logout')
 
-
+# Actually, inacessible method for normal humans
 @log
 async def get_logout(request):
     raise web.HTTPFound('/login', text='Login first')
 
 
+# !!!TODO!!!:
+# Method to recover a password
 @log
 async def post_recover(request):
     # recover user password by its user recovery link in the database `pwd_reset_token`
