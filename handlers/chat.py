@@ -62,7 +62,7 @@ async def post_chat(request):
                     msg_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
                     # Add user's message to DB
-                    await add_msg(pool, (from_user, msg, msg_date))
+                    await add_msg(pool, from_user, msg, msg_date)
 
                     # Set user's last message time
                     session['user_waited'] = time.time()
@@ -95,6 +95,7 @@ async def post_chat(request):
         raise web.HTTPFound('/login')
 
 
+# Handler that handles everything -> basically redirects form * to /chat
 async def handle_all(request):
     print('Redirecting user to /chat')
 
